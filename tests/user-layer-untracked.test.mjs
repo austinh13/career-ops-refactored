@@ -77,20 +77,18 @@ try {
 
   const shippedScaffolds = [
     'data/.gitkeep',
-    'data/offers/.gitkeep',
-    'data/parser-output/.gitkeep',
     'jds/.gitkeep',
     'output/.gitkeep',
     'reports/.gitkeep',
   ];
   if (
     shippedScaffolds.every((path) => contract.includes(`\`${path}\``)) &&
-    contract.includes('The updater may create or replace only these system-owned `.gitkeep` scaffolds') &&
-    contract.includes('It never checks out or modifies any other user file in those directories.')
+    contract.includes('Only these system-owned `.gitkeep` scaffolds may be created or replaced') &&
+    contract.includes('No other user file in those directories is ever modified.')
   ) {
     pass('data contract lists all shipped scaffolds and preserves other user files');
   } else {
-    fail('data contract must list all six shipped scaffolds and protect other user files');
+    fail('data contract must list all shipped scaffolds and protect other user files');
   }
 
   // These are system-owned directory scaffolds, not user data. A root-level
@@ -99,8 +97,6 @@ try {
   // Keep this allowlist exact so real user files in the same paths still fail.
   const trackedScaffolds = new Set([
     'data/.gitkeep',
-    'data/offers/.gitkeep',
-    'data/parser-output/.gitkeep',
     'documents/.gitkeep',
     'documents/README.md',
     'jds/.gitkeep',

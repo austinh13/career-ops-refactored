@@ -313,8 +313,6 @@ if (process.platform !== 'win32' && process.getuid?.() !== 0) {
 {
   const dataContractDoc = readFileSync(join(ROOT, 'DATA_CONTRACT.md'), 'utf-8');
   const gitignoreDoc = readFileSync(join(ROOT, '.gitignore'), 'utf-8');
-  const updaterSrc = readFileSync(join(ROOT, 'update-system.mjs'), 'utf-8');
-  const manifestSrc = readFileSync(join(ROOT, 'lib', 'update-manifest.mjs'), 'utf-8');
   const agentsDoc = readFileSync(join(ROOT, 'AGENTS.md'), 'utf-8');
   if (
     dataContractDoc.includes('documents/*')
@@ -323,14 +321,11 @@ if (process.platform !== 'win32' && process.getuid?.() !== 0) {
     && gitignoreDoc.includes('!documents/.gitkeep')
     && gitignoreDoc.includes('!documents/README.md')
     && gitignoreDoc.includes('data/intake-state.json')
-    && updaterSrc.includes("'documents/'")
-    && manifestSrc.includes("'modes/intake.md'")
-    && manifestSrc.includes("'intake.mjs'")
     && agentsDoc.includes('`intake`')
   ) {
-    pass('intake registered in data contract, gitignore, updater manifest, and AGENTS.md routing');
+    pass('intake registered in data contract, gitignore, and AGENTS.md routing');
   } else {
-    fail('intake missing from data contract / gitignore / update-system paths / AGENTS.md');
+    fail('intake missing from data contract / gitignore / AGENTS.md');
   }
 
   // documents/ holds the master CV, diplomas and reference letters — the

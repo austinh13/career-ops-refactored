@@ -54,7 +54,6 @@ evaluation-mode file; per-JD market fit is judged from the JD's own signals
 |------|----------|------|
 | `_shared.md` | `modes/_shared.md` | Shared context, archetypes, global rules, Singapore market specifics |
 | `offer.md` | `modes/oferta.md` | Full A-H evaluation with Singapore overrides (Block D comp, Block G legitimacy, Block H answers) |
-| `apply.md` | `modes/apply.md` | Live application-form assistant with Singapore-specific fields |
 | `pipeline.md` | `modes/pipeline.md` | URL inbox with Singapore portal notes |
 
 The remaining modes (`scan`, `batch`, `pdf`, `tracker`, `deep`, `contacto`,

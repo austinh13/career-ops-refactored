@@ -79,8 +79,6 @@ Top 5 ændringer i CV'et + Top 5 ændringer på LinkedIn for at maksimere matche
 
 Kolonnen **Reflection** indfanger, hvad der blev lært, eller hvad der ville blive gjort anderledes. Det signalerer senioritet -- juniorer beskriver, hvad der skete, seniorer drager læring af det.
 
-**Story Bank:** Hvis `interview-prep/story-bank.md` findes, så tjek om disse stories allerede er der. Hvis ikke, så tilføj de nye. Med tiden opbygger det en genbrugelig bank på 5-10 master-stories, der kan tilpasses ethvert samtalespørgsmål.
-
 **Udvalgt og rammesat efter arketypen:**
 - FDE -> fremhæv leveringstempo og kundenærhed
 - SA -> fremhæv arkitekturbeslutninger

@@ -29,7 +29,7 @@ if ((help.stdout || '').includes('Usage:')) {
 } else {
   fail('--help prints usage');
 }
-for (const flag of ['--no-fallback', '--throttle', '--no-record', '--file', '--help']) {
+for (const flag of ['--no-fallback', '--throttle', '--file', '--help']) {
   if ((help.stdout || '').includes(flag)) pass(`--help documents ${flag}`);
   else fail(`--help documents ${flag}`);
 }
@@ -67,7 +67,7 @@ else fail('no args prints usage to stderr');
 // with the install hint while the run still exits non-zero.
 console.log('\ncheck-liveness — a failed browser launch does not end the batch');
 const emptyBrowsers = mkdtempSync(join(tmpdir(), 'career-ops-no-browsers-'));
-const batch = spawnSync(NODE, [scriptPath, '--no-record',
+const batch = spawnSync(NODE, [scriptPath,
   'https://careers.example.com/closed/job-1',
   'https://careers.example.com/closed/job-2',
 ], {

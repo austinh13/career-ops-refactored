@@ -94,8 +94,7 @@ Identical to `modes/pdf.md`. Legitimate reformulation:
 ## Post-generation
 
 **Leave the tracker's PDF column alone.** It tracks a generated PDF indexed in
-`data/pdf-index.tsv`, which `find.mjs`, the dashboard and the `email` mode read to
-locate an attachment. This mode produces no PDF, so marking it `✅` would point
+`data/pdf-index.tsv`, which `find.mjs` reads to locate an attachment. This mode produces no PDF, so marking it `✅` would point
 those consumers at a file that does not exist. A `text`-mode run that later needs a
 PDF can run `/career-ops pdf` and pick the column up then.
 

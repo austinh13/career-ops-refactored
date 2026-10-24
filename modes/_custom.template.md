@@ -17,7 +17,7 @@
      touched, and we never auto-submit an application for you).
 
      Because this is a user-layer file, anything you write here
-     survives `node update-system.mjs`. Put customizations HERE,
+     survives a system update. Put customizations HERE,
      not in CLAUDE.md / modes/_shared.md / other system files --
      those get overwritten on update.
      ============================================================ -->
@@ -28,7 +28,7 @@
      - Always write evaluation summaries in British English.
      - Never include a photo in my CV (US / ATS-first market).
      - Cap each batch run at 20 listings unless I say otherwise.
-     - If a report scores below 6, skip the cover letter. -->
+     - If a report scores below 6, skip the tailored CV. -->
 
 (none yet -- add yours above)
 

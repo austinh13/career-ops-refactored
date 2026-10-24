@@ -33,8 +33,6 @@ const REPORT = `# 評価: {Company} — {Role}
 {legitimacy}
 ## Risk Summary
 {risks}
-## H) Answers
-{answers}
 `;
 const mode = (body = REPORT, fence = '```') => `# Mode instructions\n\n${fence}markdown\n${body}${fence}\n`;
 
@@ -68,8 +66,8 @@ test('every evaluation mode, frozen ones included, writes the exact **URL:** lab
   }
 });
 
-test('a missing H answers section is reported', () => {
-  assert.ok(structuralGaps(mode(REPORT.replace('## H) Answers\n{answers}\n', ''))).includes('## H)'));
+test('a missing Risk Summary section is reported', () => {
+  assert.ok(structuralGaps(mode(REPORT.replace('## Risk Summary\n{risks}\n', ''))).includes('## Risk Summary'));
 });
 
 test('a localized H1, CRLF and either Markdown fence spelling remain valid', () => {
@@ -112,7 +110,7 @@ test('later corrected literals cannot hide duplicated or misordered sections', (
   const misordered = REPORT.replace('## G) Legitimacy\n{legitimacy}\n## Risk Summary\n{risks}',
     '## Risk Summary\n{risks}\n## G) Legitimacy\n{legitimacy}');
   assert.ok(structuralGaps(mode(misordered)).some(gap => gap.startsWith('report section order')));
-  const appended = misordered + '\n## G) Legitimacy\n## Risk Summary\n## H) Answers\n';
+  const appended = misordered + '\n## G) Legitimacy\n## Risk Summary\n';
   assert.ok(structuralGaps(mode(appended)).includes('duplicate ## G)'));
   const swapped = REPORT.replace('## C) Level', '## D) Level').replace('## D) Compensation', '## C) Compensation');
   assert.ok(structuralGaps(mode(swapped)).some(gap => gap.startsWith('report section order')));
@@ -155,9 +153,9 @@ test('discovery and parity agree on indented and tab-separated A headings', t =>
   assert.deepEqual(discoverEvaluationModes(root), ['xx/new-market-name.md']);
 
   // An unknown filename must remain visible when another report section drifts.
-  writeFileSync(join(root, path), template.replace('## H) Answers', '### H) Answers'));
+  writeFileSync(join(root, path), template.replace('## G) Legitimacy', '### G) Legitimacy'));
   assert.deepEqual(discoverEvaluationModes(root), ['xx/new-market-name.md']);
-  assert.ok(structuralGaps(readModeText(root, path)).includes('## H)'));
+  assert.ok(structuralGaps(readModeText(root, path)).includes('## G)'));
 });
 
 test('nested checkout markers exclude another tree before any mode is read', t => {

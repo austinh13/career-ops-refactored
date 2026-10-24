@@ -16,7 +16,6 @@ const BOARD = { origin: 'https://exampleco.zohorecruit.com' };
 
 try {
   const mod = await import(pathToFileURL(join(ROOT, 'providers/zoho-recruit.mjs')).href);
-  const { resolveProvider } = await import(pathToFileURL(join(ROOT, 'providers/_registry.mjs')).href);
   const zoho = mod.default;
 
   if (zoho.id === 'zoho-recruit') pass('zoho-recruit.id is "zoho-recruit"');
@@ -65,9 +64,6 @@ try {
   if (zoho.detect(null) === null && zoho.detect({}) === null) pass('detect returns null for a null / empty entry');
   else fail('detect claimed a null / empty entry');
 
-  const routed = resolveProvider({ name: 'ExampleCo', careers_url: BOARD_URL }, new Map([['zoho-recruit', zoho]]));
-  if (routed?.provider === zoho) pass('registry routes a zohorecruit.com careers_url to zoho-recruit');
-  else fail(`registry route=${JSON.stringify(routed)}`);
 
   // ── list page parsing ──
   const jobs = mod.parseZohoJobsPage(fixture('zoho-recruit-list.html'), BOARD, 'ExampleCo');

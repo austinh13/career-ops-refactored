@@ -1,39 +1,31 @@
 # Architecture
 
-A high-level map of how career-ops is put together. For the precise system/user file boundary, see [DATA_CONTRACT.md](DATA_CONTRACT.md); for contribution mechanics, see [CONTRIBUTING.md](CONTRIBUTING.md); for runtime flow diagrams (evaluation steps, batch processing), see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+A high-level map of how career-ops is put together. For the precise system/user file boundary, see [DATA_CONTRACT.md](DATA_CONTRACT.md); for contribution mechanics, see [CONTRIBUTING.md](CONTRIBUTING.md).
+
+This fork keeps two functions: **job grading** and **resume improvement**.
 
 ## Principles
 
-Career-ops is built on three commitments that every design decision serves:
-
-- **Local-first.** Everything runs on your machine against your files. No account required, no server in the loop for the core tool.
-- **AI-agnostic.** The logic lives in Markdown prompt files under `modes/`, executed by whatever AI coding CLI you use (Claude Code, Codex, OpenCode, Gemini, Qwen, Grok, Antigravity) or by standalone Node scripts. No single model is hardcoded.
-- **Human-in-the-loop.** The tool prepares and evaluates; the human reviews and clicks. It never submits applications on your behalf.
+- **Local-first.** Everything runs on your machine against your files. No account required, no server in the loop.
+- **AI-agnostic.** The logic lives in Markdown prompt files under `modes/`, executed by whatever AI coding CLI you use (Claude Code, Codex, OpenCode, Qwen, Grok, Antigravity, Pi, Kimi) or by standalone Node scripts. No single model is hardcoded.
+- **Human-in-the-loop.** The tool grades and prepares; the human decides and sends. It never submits anything on your behalf.
 
 ## The two layers (the data contract)
 
-The single most important architectural rule: **system files** and **user files** are strictly separated.
+**System files** and **user files** are strictly separated.
 
-- **System layer** — the tool itself: `modes/`, scripts (`*.mjs`), templates, the dashboard. These are versioned and updated by `update-system.mjs`. Listed in `SYSTEM_PATHS`, in `lib/update-manifest.mjs`.
-- **User layer** — your data: `cv.md`, `config/profile.yml`, `modes/_profile.md`, `data/`, `reports/`, `jds/`, etc. The updater **never** touches these. Listed in `USER_PATHS`.
+- **System layer** — the tool itself: `modes/`, scripts (`*.mjs`), `templates/`, `batch/` scripts.
+- **User layer** — your data: `cv.md`, `config/profile.yml`, `modes/_profile.md`, `data/`, `reports/`, `jds/`, `output/`, etc.
 
-`DATA_CONTRACT.md` is the source of truth for this boundary, and `updater-migration-tests.mjs` enforces that no system path ever overlaps a user path.
+`DATA_CONTRACT.md` is the source of truth for this boundary.
 
-## Files are canonical — databases are derived
+## Files are canonical
 
-Settled doctrine ([#918](https://github.com/career-ops-hq/career-ops/issues/918)): the human-readable, git-diffable files (`data/applications.md`, `reports/`, `data/pipeline.md`) are the **permanent source of truth**. SQLite exists only as a derived index (fast queries, reindex-on-delete) and will never become a primary store — not even opt-in. The reason is ecosystem-wide: the web UI, the Go dashboard, community plugins, and thousands of fork scripts all read the files; a second canonical store would force every reader to support two modes forever. Performance work is welcome **on the derived layer**; the files stay the brain.
+The human-readable, git-diffable files (`data/applications.md`, `reports/`, `data/pipeline.md`) are the permanent source of truth. Nothing here depends on a database.
 
 ## Why the flat root
 
-The repo keeps its scripts at the root deliberately ([#1386](https://github.com/career-ops-hq/career-ops/issues/1386)). Path stability is a feature here, not an accident: the updater's `SYSTEM_PATHS` allowlist, community plugins, docs, guides, and the muscle memory of thousands of users (`node scan.mjs`) all reference these paths. A cosmetic reorganization would break forks and plugins for no functional gain. The conventions that keep the flat root navigable: one script = one job, and every script is registered in `SYSTEM_PATHS` (enforced in CI by the coverage guard).
-
-Tests are the one thing the flat root does not hold. Suites live in `tests/`, and `test-all.mjs` discovers `tests/**/*.test.mjs` — no registration list, so a new suite runs the moment it is written and a typo cannot silently turn CI green ([#1440](https://github.com/career-ops-hq/career-ops/issues/1440)). Write new ones there; `*.test.mjs` at the repo root is not discovered and will not run.
-
-Name a suite `{module}.test.mjs` when it covers exactly one root script. Name it for the behaviour it pins when it spans several scripts, or when it is one of a group carving up a large module — `outcome-tracker-local-dates.test.mjs`, `cover-unresolved-placeholders.test.mjs`. Behaviour naming is the common case by a wide margin: roughly four in five suites directly under `tests/` are named that way, so module naming is the exception and a behaviour name is not a deviation to be flagged in review. Neither form is enforced, because discovery is by glob — the name buys legibility and nothing else. `tests/providers/` is the one subtree where module naming is the norm, one suite per provider, alongside cross-provider behaviour suites like `ats-ssrf-hardening.test.mjs`; see `tests/README.md`.
-
-Discovery imports a suite in-process and shares its counters; a `node:test` suite is child-processed instead, so its results survive ([#2828](https://github.com/career-ops-hq/career-ops/issues/2828)). A discovered suite therefore reports through `pass`/`fail` from `tests/helpers.mjs` and never calls `process.exit()` or `finish()`, both of which would forge the run's verdict.
-
-This was three arrangements until recently — `tests/`, a `test/` directory, and suites sitting beside the scripts they covered — with the latter two registered by hand in `test-all.mjs`. Hand registration meant three suites shipped in `SYSTEM_PATHS` to every install while running nowhere ([#3247](https://github.com/career-ops-hq/career-ops/issues/3247), [#3303](https://github.com/career-ops-hq/career-ops/issues/3303)), which is what consolidated them ([#3306](https://github.com/career-ops-hq/career-ops/issues/3306)). Almost no suite is registered by hand any more. The residual is the `*-tests.mjs` naming convention: a few suites remain at the root, each registered by name in `test-all.mjs`'s `scripts` list alongside the `--self-test` entry points, or invoked by a workflow. Most stay for a stated reason — a flag-driven CI harness (`upgrade-tests.mjs`, run from `.github/workflows/test.yml`) and one that asserts on its own filename (`updater-migration-tests.mjs`). A per-script timeout is not a permanent reason to stay: a suite that imports `node:test` runs in a child process under `test-all.mjs`'s 30s cap, so a slow suite can be made fast and moved, as `tests/tracker-writer-lock.test.mjs` and `tests/tracker-columns.test.mjs` were ([#2906](https://github.com/career-ops-hq/career-ops/issues/2906), [#4759](https://github.com/career-ops-hq/career-ops/issues/4759); [#4010](https://github.com/career-ops-hq/career-ops/issues/4010), [#4758](https://github.com/career-ops-hq/career-ops/issues/4758)). So the convention is permanent rather than migration debt, and `tests/root-tests-registration.test.mjs` guards it: every root `*-tests.mjs` must be registered in the `scripts` list or invoked by a workflow ([#3735](https://github.com/career-ops-hq/career-ops/issues/3735)). The list here is by name rather than by count on purpose; a count goes stale the first time a suite is added. `tests/no-root-suites.test.mjs` separately keeps the root empty of `*.test.mjs`, where discovery does not reach. Playwright specs are the deliberate exception: `tests/cv-visual/` is named `*.spec.mjs`, which discovery does not match, and runs from `playwright.cv.config.mjs`.
+Scripts live at the repository root deliberately: path stability is a feature (`node merge-tracker.mjs`, `node generate-pdf.mjs`). One script = one job. Tests live in `tests/`; `test-all.mjs` discovers `tests/**/*.test.mjs` with no registration list, so a new suite runs the moment it is written. `*.test.mjs` at the repo root is not discovered and will not run.
 
 ## Component map
 
@@ -42,60 +34,47 @@ AI coding CLI  ─┐
 (or scripts)    │  reads prompt files
                 ▼
    modes/*.md  ──────────────►  the "brain": scoring, evaluation,
-   (_shared.md = scoring core)   apply, scan, interview, etc. prompts
+   (_shared.md = scoring core)   CV tailoring prompts
                 │
-   ┌────────────┼─────────────────────────────────────────────┐
-   ▼            ▼                  ▼               ▼            ▼
- scan        evaluate          generate         track       update
- scan.mjs    oferta.md         PDFs/CVs/        data/        update-
- providers/  (+eval scripts)   cover letters    reports/     system.mjs
+   ┌────────────┼──────────────────────────┐
+   ▼            ▼                          ▼
+ verify      grade                      tailor
+ liveness    oferta.md                  pdf.md / latex.md / text.md
+ fetch-jd    (+ eval scripts)           verify-cv-facts / verify-ats
 ```
 
-### Discovery — `scan.mjs` + `providers/`
-Finds jobs from **open, no-auth public sources**. `scan.mjs` is zero-token: it calls public ATS APIs (Greenhouse, Ashby, Lever, BambooHR, Teamtailor, Workday, Breezy) and RSS/JSON boards via per-board modules in `providers/`. Auth-gated/login-required sources are intentionally out of core (they belong in the plugin layer). Results land in `data/pipeline.md`.
+### Verification — never grade a dead posting
+`check-liveness.mjs` / `liveness-*.mjs` check a posting against public ATS APIs first (zero-token) and a real browser second. `fetch-jd.mjs` and `browser-extract.mjs` fetch the JD text; `archive-posting.mjs` and `check-jd-archive.mjs` keep every report's JD on file.
 
-### Evaluation — `modes/oferta.md` + `modes/_shared.md`
-The heart of the tool. `oferta.md` defines the A–H evaluation blocks (H is conditional, on scores of 4.5 and above); `_shared.md` defines the 1–5 scoring system, archetype detection, posting-legitimacy signals, and global rules. The AI reads these plus your `cv.md` and produces a structured report.
+### Grading — `modes/oferta.md` + `modes/_shared.md`
+`oferta.md` defines the A–G evaluation blocks, verdict and risk summary; `_shared.md` defines the 1–5 scoring system, archetype detection, posting-legitimacy signals, and global rules. `modes/oferta-signals/` holds the Block G legitimacy checks read on demand, backed by the jurisdiction tables in `templates/`. `triage.md` is a cheap first pass, `ofertas.md` compares offers, `pipeline.md` and `batch.md` grade many postings, `auto-pipeline.md` chains grading and CV tailoring.
 
-**Standalone evaluators** let you run the same scoring without an interactive CLI, against cheaper/local models: `gemini-eval.mjs` (Google free tier), `ollama-eval.mjs` (fully local), and `openai-eval.mjs` (any OpenAI-compatible endpoint).
+**Standalone evaluators** run the same scoring without an interactive CLI: `gemini-eval.mjs`, `ollama-eval.mjs`, `openai-eval.mjs`, `openrouter-runner.mjs`, and `batch-evaluate-gemini.mjs` for batches. `evals/` and `eval-golden.mjs` hold the golden set that keeps them consistent.
 
-### Generation — PDFs, CVs, cover letters
-`generate-pdf.mjs` (Playwright HTML→PDF), `generate-latex.mjs` / `build-cv-latex.mjs`, `generate-cover-letter.mjs`. ATS-safe templates live in `templates/` and `fonts/`.
+### Resume improvement — CVs, ATS, profile
+`modes/pdf.md` builds a tailored CV payload; `build-cv-html.mjs` / `build-cv-latex.mjs` render it through `templates/`; `generate-pdf.mjs` (Playwright) and `generate-latex.mjs` produce the files. Gates: `verify-cv-facts.mjs` (every claim traces to `cv.md`), `cv-title-check.mjs`, `verify-cv-structure.mjs`, `verify-ats.mjs`, `keyword-match.mjs`, `jd-skill-gap.mjs`. `add`, `expand`, `master-profile` and `intake` grow `cv.md` and the profile from real evidence, always confirm-before-write.
 
 ### Tracking — `data/` + `reports/` + tracker scripts
-Every evaluated offer is registered. `data/applications.md` is the canonical tracker table; `reports/{NNN}-{company}-{date}.md` holds full evaluations. `tracker.mjs`, `merge-tracker.mjs`, `dedup-tracker.mjs`, `normalize-statuses.mjs`, and `reconcile-pipeline.mjs` keep it consistent (atomic writes + a SQLite index). Report numbers are claimed atomically via `reserve-report-num.mjs`.
-
-### Liveness — never evaluate a dead posting
-`check-liveness.mjs` / `liveness-*.mjs` verify a posting is still open (zero-token) before it costs evaluation time.
-
-### Self-update — `update-system.mjs`
-Safely pulls new system files from upstream without touching user data. It backs up, fetches, re-execs the target updater (resolving its import closure so a new import can't break the upgrade), then checks out only `SYSTEM_PATHS` (`lib/update-manifest.mjs`, which the updater reads rather than imports so it stays self-loading). `BOOTSTRAP_PATHS` covers very old installs.
+Every graded offer is registered. `data/applications.md` is the tracker table; `reports/{NNN}-{company}-{date}.md` holds full evaluations. `merge-tracker.mjs`, `dedup-tracker.mjs`, `normalize-statuses.mjs`, `fix-report-links.mjs` and `reconcile-pipeline.mjs` keep it consistent (atomic writes). Report numbers are claimed atomically via `reserve-report-num.mjs`.
 
 ### Multi-CLI entry files
-`CLAUDE.md`, `OPENCODE.md` and `CODEX.md` are thin `@AGENTS.md` wrappers around the canonical `AGENTS.md`. `GEMINI.md` is a legacy no-op guard, so Antigravity does not load the project instructions twice. The `.agents/skills/` entrypoints follow the [open agent skill standard](https://agentskills.io) and route into the same modes.
-
-### Dashboard (optional)
-A standalone Go TUI under `dashboard/` for browsing the pipeline. Isolated from the core — never required.
+`CLAUDE.md`, `OPENCODE.md` and `CODEX.md` are thin `@AGENTS.md` wrappers around the canonical `AGENTS.md`. `GEMINI.md` is a legacy no-op guard. The `.agents/skills/` entrypoint follows the [open agent skill standard](https://agentskills.io); the per-CLI skill folders symlink to it.
 
 ## Data flow (a typical run)
 
 ```
-scan ──► data/pipeline.md ──► evaluate (oferta + cv) ──► reports/NNN-*.md
-                                          │                      │
-                                          └──► data/applications.md (tracker)
-                                                         │
-                                          apply (human reviews + clicks)
+paste JD/URL ──► liveness check ──► oferta + cv.md ──► reports/NNN-*.md ──► data/applications.md
+                                                            │
+                                                            └──► pdf mode ──► verified, ATS-checked CV
 ```
 
 ## Quality gates
 
-- `test-all.mjs` — the full suite (500+ checks across scoring, scan, tracker, PDF, security, updater).
-- `updater-migration-tests.mjs` — enforces the system/user boundary and safe cross-version upgrades.
-- CI: `test` + CodeQL are required; CodeRabbit reviews every PR; Renovate keeps deps current.
+- `test-all.mjs` — the full suite.
+- CI: `test` + CodeQL.
 
 ## Where to start reading
 
 - The boundary → `DATA_CONTRACT.md`
 - The scoring → `modes/_shared.md` + `modes/oferta.md`
-- Adding a job source → [`providers/ADDING_A_PROVIDER.md`](providers/ADDING_A_PROVIDER.md)
-- The updater → `update-system.mjs`; the paths it ships → `lib/update-manifest.mjs`
+- The CV flow → `modes/pdf.md`

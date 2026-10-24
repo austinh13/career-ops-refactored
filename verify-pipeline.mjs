@@ -13,11 +13,7 @@
  * 8. Stale report-number reservation sentinels are garbage-collected
  * 9. No two report files cover the same company+role (warning — see #1425)
  * 10. Every report file has a tracker row referencing it (warning — see #1425)
- * 11. Via channel consistency (see #1596)
  * 12. No # value reused across 2+ tracker rows (error — see #1704)
- * 13. applications.md <-> active-interviews.md status sync (see #1504)
- * 14. data/follow-ups.md table schema (see #2971)
- * 15. portals.yml entries no provider claims (see #3251)
  * 16. No invisible control characters in tracker cells (error — see #3892)
  * 17. JD archive coverage — check-jd-archive.mjs's findings (warning/error — see #4525)
  *
@@ -30,13 +26,10 @@ import { fileURLToPath } from 'url';
 import { getCareerOpsRoot, resolveTrackerPath } from './path-resolver.mjs';
 import {
   looksLikeScoreCell, isSeparatorRow, isHeaderRow, resolveColumns,
-  normalizeTextKey, normalizeVia, unwrapReportUrlToken, parseMarkdownLinks,
+  normalizeTextKey, unwrapReportUrlToken, parseMarkdownLinks,
 } from './tracker-parse.mjs';
 import { CONTROL_CHARS, findDeadReportLink, trackerLinkDirsFor } from './tracker-utils.mjs';
 import { normalizeUrl } from './url-key.mjs';
-import { checkTrackerSync } from './tracker-sync-check.mjs';
-import { normalizeStatus } from './followup-cadence.mjs';
-import { checkFollowupsSchema } from './stats.mjs';
 import { loadCanonicalStates } from './tracker-utils.mjs';
 import { checkJdArchive } from './check-jd-archive.mjs';
 
@@ -402,76 +395,6 @@ for (const name of reportFiles) {
 }
 if (orphanReports === 0) ok('No orphan reports');
 
-// --- Check 11: Via channel consistency (#1596) ---
-// The Via column records the intermediary (agency/recruiter firm; `—` when the
-// application was direct). Unknown employers use the structural marker `?` in
-// Company — never a word like "Confidential", which is locale-dependent and can
-// collide with a real firm name.
-let viaIssues = 0;
-const CONFIDENTIAL_WORD_RE = /^(confidential|vertraulich|confidentiel|confidencial|riservato|gizli|機密|سري)$/i;
-for (const e of entries) {
-  const company = String(e.company || '').trim();
-  const via = String(e.via || '').trim();
-  if (company === '?') {
-    if (COLMAP.via == null) {
-      warn(`#${e.num}: unknown employer (?) but the tracker has no Via column — add it with: node merge-tracker.mjs --migrate-via`);
-      viaIssues++;
-    } else if (!via || via === '—') {
-      error(`#${e.num}: unknown employer (?) with no Via channel — record the agency/recruiter firm`);
-      viaIssues++;
-    }
-  }
-  if (CONFIDENTIAL_WORD_RE.test(company)) {
-    warn(`#${e.num}: company "${company}" looks like a confidentiality placeholder — use the structural marker ? (locale-invariant, can't collide with a real firm)`);
-    viaIssues++;
-  }
-}
-// Same company+role reached through different channels: both submissions are
-// real, so this is a warning to the human (double-submission risk), never an
-// auto-merge. Channel identity uses the shared normalizeVia() that merge-tracker
-// and dedup-tracker key agencies with (#2397), so "Hays" and "HAYS " read as one
-// channel while リクルート and パーソル stay two; the raw spelling is kept for
-// the message. Before this, both non-Latin agencies normalized to '' and fell
-// back to 'direct', hiding exactly the double-submission this check exists for.
-//
-// A SKIP row is not a channel (#3978). The canonical way to RESOLVE a
-// cross-channel collision is the one states.yml already provides: apply
-// through one channel, mark the other SKIP ("Doesn't fit, don't apply").
-// Counting that row as a channel warned forever about the double submission
-// the user had just avoided, with no "resolve by hand" action left that could
-// clear it — so the only ways out were ignoring the check permanently or
-// falsifying the Via/Company to silence it. A check correct behaviour cannot
-// satisfy is worse than no check.
-//
-// Deliberately narrow — skip only. `discarded` is ambiguous ("Discarded by
-// candidate or offer closed") and can follow a real application; `rejected`
-// implies one was sent; `evaluated` is pre-decision, and warning BEFORE a
-// second submission is this check's most valuable moment. All three stay
-// channels. Status is read through the shared states.yml-driven
-// normalizeStatus() for the same reason the column layout comes from
-// tracker-parse: a local alias table here would miss the states.yml spellings
-// it never got told about (geo_blocker, uygun değil) and drift from Check 1.
-const isNeverSubmitted = (status) => normalizeStatus(String(status || '')) === 'skip';
-const normalizeChannel = (v) => normalizeVia(v ?? '') || 'direct';
-const channelsByRole = new Map();
-for (const e of entries) {
-  const company = String(e.company || '').trim();
-  if (!company || company === '?') continue;
-  if (isNeverSubmitted(e.status)) continue;
-  const key = `${company.toLowerCase()}::${String(e.role || '').trim().toLowerCase()}`;
-  if (!channelsByRole.has(key)) channelsByRole.set(key, new Map());
-  const channels = channelsByRole.get(key);
-  const norm = normalizeChannel(e.via);
-  if (!channels.has(norm)) channels.set(norm, { raw: String(e.via || '').trim() || '—', num: e.num });
-}
-for (const [key, vias] of channelsByRole) {
-  if (vias.size > 1) {
-    const list = [...vias.values()];
-    warn(`Cross-channel duplicate — ${key.replace('::', ' / ')} reached via ${list.map(v => v.raw).join(' AND ')} (rows ${list.map(v => `#${v.num}`).join(', ')}) — double-submission risk, resolve by hand`);
-    viaIssues++;
-  }
-}
-if (viaIssues === 0) ok('Via channels consistent');
 // --- Check 12: Duplicate tracker numbers (#1704) ---
 // The # column is a row id and must be unique. Unlike Check 2 (company+role
 // dedup, which can false-positive on a legitimate re-application), the SAME
@@ -495,148 +418,6 @@ for (const [num, group] of numGroups) {
   }
 }
 if (dupeNums === 0) ok('No duplicate tracker numbers');
-
-// --- Check 13: applications.md <-> active-interviews.md status sync (#1504) ---
-// Delegates to tracker-sync-check.mjs's exported checkTrackerSync() rather than
-// re-implementing the matching/two-tier resolution logic here or shelling out
-// to a second process. Read-only: this only surfaces drift, it does not write
-// a fix (tracker-sync-check.mjs is intentionally reporting-only for now — see
-// its module header).
-let syncResult;
-try {
-  syncResult = checkTrackerSync({ appsFile: APPS_FILE });
-} catch (err) {
-  // A check that could not RUN is a failed check, not a warning. warn() does not affect the exit
-  // code, so a throw here made verify-pipeline print a notice and still exit 0 — and to anything
-  // reading the exit status (CI, a cron wrapper, a pre-push hook) that is indistinguishable from
-  // the invariant holding. We do not know whether the tracker is in sync; we know we failed to
-  // look. The honest report is failure.
-  error(`Sync check could not run — the tracker was NOT verified: ${err.message}`);
-}
-
-if (syncResult) {
-  const tier1Mismatches = syncResult.mismatches.filter(m => m.resolution === 'auto-tier1');
-  const tier2Mismatches = syncResult.mismatches.filter(m => m.resolution === 'needs-review-tier2');
-  const unmatchedRows = syncResult.mismatches.filter(m => m.resolution === 'unmatched');
-
-  for (const m of tier1Mismatches) {
-    warn(`Sync drift (auto-resolvable): ${m.company} — ${m.role}: applications.md="${m.applicationsStatus}" vs active-interviews.md="${m.activeInterviewsStatus}" -> suggest "${m.suggestedStatus}" in ${m.staleIn} (run node tracker-sync-check.mjs for details)`);
-  }
-  for (const m of tier2Mismatches) {
-    warn(`Sync drift (needs human review): ${m.company} — ${m.role}: applications.md="${m.applicationsStatus}" (${m.applicationsLastModified || 'no blame info'}) vs active-interviews.md="${m.activeInterviewsStatus}" (${m.activeInterviewsLastModified || 'no blame info'})`);
-  }
-  for (const m of unmatchedRows) {
-    warn(`Sync check: active-interviews.md row for "${m.company}" — "${m.role}" could not be matched to a tracker row (${m.note})`);
-  }
-  if (tier1Mismatches.length === 0 && tier2Mismatches.length === 0 && unmatchedRows.length === 0) {
-    ok(syncResult.summary.total > 0
-      ? 'applications.md and active-interviews.md are in sync'
-      : 'No active-interviews.md rows to sync-check');
-  }
-}
-
-// --- Check 14: data/follow-ups.md table schema (#2971) ---
-// stats.mjs (computeFollowupStats) and followup-cadence.mjs both read this table
-// positionally, in the shape modes/followup.md documents, and both skip any row
-// whose num/appNum cells don't parse as integers. A table written with a
-// different column order therefore reports as ZERO follow-ups in both tools,
-// silently — indistinguishable from a file where nothing has been logged yet.
-// Follow-up compliance is exactly the number a user consults to decide whether
-// their follow-ups are working, so a silent zero is actively misleading. This is
-// the only place that difference is visible.
-//
-// Path resolution deliberately matches the two consumers (CAREER_OPS/data/...)
-// rather than APPS_FILE's directory: the check exists to predict what they will
-// do, so it has to read the same file they read.
-const FOLLOWUPS_FILE = join(CAREER_OPS, 'data', 'follow-ups.md');
-const FOLLOWUPS_COLUMNS = '| num | appNum | date | company | role | channel | contact | notes |';
-if (!existsSync(FOLLOWUPS_FILE)) {
-  ok('No follow-ups.md yet — nothing to schema-check');
-} else {
-  const fups = checkFollowupsSchema(readFileSync(FOLLOWUPS_FILE, 'utf-8'));
-  if (fups.pipeLines === 0) {
-    ok('follow-ups.md has no table rows yet');
-  } else if (!fups.sawSeparator) {
-    error(`follow-ups.md has table rows but no header delimiter row, so every row is skipped — expected ${FOLLOWUPS_COLUMNS} (see modes/followup.md)`);
-  } else if (fups.dataRows === 0) {
-    ok('follow-ups.md has no logged follow-ups yet');
-  } else if (fups.parsed === 0) {
-    error(`follow-ups.md: none of its ${fups.dataRows} row(s) parse, so stats.mjs and followup-cadence.mjs will both report zero follow-ups — expected column order ${FOLLOWUPS_COLUMNS} (see modes/followup.md)`);
-  } else if (fups.unparsedLines.length > 0) {
-    warn(`follow-ups.md: ${fups.unparsedLines.length} of ${fups.dataRows} rows will be skipped by stats.mjs and followup-cadence.mjs (line${fups.unparsedLines.length === 1 ? '' : 's'} ${fups.unparsedLines.join(', ')}) — expected ${FOLLOWUPS_COLUMNS}`);
-  } else {
-    ok(`follow-ups.md schema valid (${fups.parsed} logged follow-up${fups.parsed === 1 ? '' : 's'})`);
-  }
-}
-
-// --- Check 15: portals.yml entries no provider claims (#3251) ---
-// Coverage rot is invisible from every other check here: an entry with
-// `enabled: true` and a careers_url nothing matches reads as a tracked company
-// in the config and contributes zero postings on every scan. Twelve of those
-// were live on 2026-08-26, one of them a company whose real board existed and
-// was one character off the slug in the file.
-//
-// Only the OFFLINE half of audit-portals.mjs runs here — provider resolution is
-// pure config matching, so this check stays as fast and network-free as the rest
-// of verify-pipeline. The live half (does the board answer, and with whose
-// jobs?) needs 170 fetches and stays a separate command: `node audit-portals.mjs`.
-//
-// portals.yml is user-layer and gitignored, so its absence is not a finding.
-const PORTALS_FILE = process.env.CAREER_OPS_PORTALS || join(CAREER_OPS, 'portals.yml');
-if (!existsSync(PORTALS_FILE)) {
-  ok('No portals.yml yet — nothing to coverage-check');
-} else {
-  try {
-    const { findUnclaimedEntries } = await import('./audit-portals.mjs');
-    const { loadProviders } = await import('./providers/_registry.mjs');
-    const { mergeProviderPlugins } = await import('./plugins/_engine.mjs');
-    const { loadYaml } = await import('./lib/yaml-document.mjs');
-
-    const cfg = loadYaml(readFileSync(PORTALS_FILE, 'utf-8')) || {};
-    // Both sections, because scan.mjs resolves both through the same registry:
-    // an unclaimed aggregator board is exactly as dead as an unclaimed company.
-    const entries = [
-      ...(Array.isArray(cfg.tracked_companies) ? cfg.tracked_companies : []),
-      ...(Array.isArray(cfg.job_boards) ? cfg.job_boards : []),
-    ];
-    // providers/ and plugins/ both ship in the code layer — resolve them from
-    // CODE_ROOT (scan.mjs does the same). Without mergeProviderPlugins() the
-    // health check sees only providers/*.mjs and reports every enabled
-    // plugin-provider entry as an unknown provider that "never scans", while
-    // the scanner resolves and scans it (#4026). No-op for a plugin-free
-    // install: mergeProviderPlugins returns before any work when
-    // config/plugins.yml is absent.
-    const providers = await loadProviders(join(CODE_ROOT, 'providers'));
-    await mergeProviderPlugins(providers, { root: CODE_ROOT, dataRoot: CAREER_OPS });
-    const { silent, handoff, unknownProvider } = findUnclaimedEntries(entries, providers);
-
-    // findUnclaimedEntries silently skips an entry with no (or blank) `name` —
-    // it can't report what it can't label. Without this, that entry vanishes
-    // from silent/handoff/unknownProvider entirely, and the enabled count
-    // below (which doesn't share the same eligibility rule) would still
-    // include it — so a malformed entry never gets a provider check AND the
-    // "All N entries resolve" success line claims it as resolved anyway.
-    const malformed = entries.filter(e => e && e.enabled !== false && (typeof e.name !== 'string' || !e.name.trim()));
-    for (const e of malformed) {
-      warn(`portals.yml: an enabled entry has no name (careers_url: ${e.careers_url || 'none'}) — it cannot be provider-checked; give it a name`);
-    }
-
-    for (const e of unknownProvider) {
-      error(`portals.yml: "${e.name}" sets an unknown provider — ${e.error}. The entry never scans (see providers/ for valid ids)`);
-    }
-    for (const e of silent) {
-      warn(`portals.yml: "${e.name}" is enabled but no provider claims ${e.careers_url || 'its careers_url'} — scan.mjs skips it on every run without naming it (run node audit-portals.mjs)`);
-    }
-    if (silent.length === 0 && unknownProvider.length === 0 && malformed.length === 0) {
-      const enabled = entries.filter(e => e && e.enabled !== false).length;
-      ok(handoff.length > 0
-        ? `All ${enabled - handoff.length} scannable portals.yml entries resolve to a provider (${handoff.length} on websearch handoff)`
-        : `All ${enabled} enabled portals.yml entries resolve to a provider`);
-    }
-  } catch (err) {
-    warn(`Portal coverage check could not run: ${err.message}`);
-  }
-}
 
 // --- Check 16: invisible control bytes already in tracker cells (#3892) ---
 // cell() in tracker-utils.mjs strips these on the way in, which stops new ones
@@ -668,9 +449,9 @@ for (let i = 0; i < lines.length; i++) {
 if (controlByteRows === 0) ok('No control characters in tracker cells');
 
 // --- Check 17: JD archive coverage (#4525) ---
-// check-jd-archive.mjs is a plain local filesystem scan — no network, no cost
-// reason to keep it as a command a user has to remember to run separately the
-// way audit-portals.mjs's live half justifiably is. Its own CLI already
+// check-jd-archive.mjs is a plain local filesystem scan — no network, no cost,
+// so there is no reason to keep it a command a user has to remember to run
+// separately. Its own CLI already
 // distinguishes two severities and this mirrors that split exactly:
 // `missing-jd-archive` is what its own exit code treats as hard (a SENT
 // application with no archived JD and no terminal status to excuse it), so it

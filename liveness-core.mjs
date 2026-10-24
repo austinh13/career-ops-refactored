@@ -1,5 +1,4 @@
 import { resolveColumns, parseTrackerRow, linkedReportNumbers, reportUrlForNumbers } from './tracker-parse.mjs';
-import { parseScanHistoryLine } from './lib/scan-history-columns.mjs';
 
 // Portals write closure banners with typographic punctuation and accents:
 // WTTJ renders "Cette offre n’est plus disponible." with U+2019, not ASCII "'".
@@ -361,13 +360,6 @@ export function classifyLiveness({ status = 0, requestedUrl = '', finalUrl = '',
   return { result: 'uncertain', code: 'no_apply_control', reason: 'content present but no visible apply control found' };
 }
 
-// A scan-history status that already carries a death certificate for its row:
-// `skipped_expired` (what scan.mjs writes) and the legacy `added (expired)`
-// suffix older histories carry. Deliberately NOT the other `skipped_*` states —
-// skipped_dup / skipped_title / skipped_no_apply_control say "this row is not a
-// fresh match", which is a different claim from "this posting is gone".
-const EXPIRED_HISTORY_STATUS = /expired/i;
-
 /**
  * True when a verdict means "the posting body could not be read", not "the
  * posting is closed". Today that condition is carried inside
@@ -378,84 +370,6 @@ const EXPIRED_HISTORY_STATUS = /expired/i;
  */
 export function isUnreadableVerdict(verdict) {
   return verdict?.code === 'insufficient_content';
-}
-
-/**
- * Plan the `skipped_expired` scan-history rows for a batch of liveness verdicts.
- *
- * The pure half of recording a liveness sweep (#3891). Kept here rather than in
- * the CLI so its four invariants are testable without a browser:
- *
- *   - **Only `expired`.** `uncertain` is a timeout or a bot wall, never a death
- *     certificate; recording it would bury a live posting behind a network
- *     hiccup, a strictly worse failure than the one this closes.
- *   - **Not an unrendered page.** The browser rung reads a page under 300
- *     characters with no closure notice and no apply control as
- *     `insufficient_content`, which is mostly a page that had not rendered yet.
- *     AGENTS.md calls a loading placeholder unconfirmed, not closed, and
- *     batch-evaluate-gemini.mjs skips the same code. A dead posting that reads
- *     this way gets no row, as it did before this recorder existed.
- *   - **Only URLs the history already knows.** A liveness sweep is not a
- *     discovery channel: a URL scan-history never saw has no row to retire, and
- *     inventing one would put a posting nothing surfaced into the dedup set.
- *   - **Once each.** A URL already carrying an expired row is left alone, so
- *     re-running the sweep is idempotent.
- *
- * A planned row is emitted under the history's OWN spelling of the URL, not the
- * caller's: the web feed keys its dedup on the verbatim `url` cell, so a row
- * written under a different spelling would not line up with the `added` row it
- * exists to retire. Matching is done through the injected `normalizeUrl` (the
- * scanner's `normalizeUrlForDedup`) rather than an import, so this module stays
- * free of scan.mjs — liveness-browser.mjs imports it.
- *
- * @param {string} scanHistoryText - Raw data/scan-history.tsv contents ('' when absent).
- * @param {{url: string, result: string, code?: string}[]} verdicts - One entry per checked URL.
- * @param {(url: string) => string} [normalizeUrl] - Dedup-key normalizer.
- * @returns {{url: string, source: string, title: string, company: string, location: string, fingerprint: string}[]}
- *   Offer-shaped rows for `appendToScanHistory(rows, date, 'skipped_expired')`.
- */
-export function planExpiredHistoryRows(scanHistoryText = '', verdicts = [], normalizeUrl = (url) => url) {
-  const knownByKey = new Map(); // dedup key -> Map(verbatim url -> row fields)
-  const recorded = new Set();   // verbatim urls that already carry an expired row
-
-  // slice(1) skips the header, the same convention collectSeenUrls uses.
-  for (const line of String(scanHistoryText ?? '').split('\n').slice(1)) {
-    // parseScanHistoryLine undoes the formula escaping the writer applied. The
-    // planned rows go back through appendToScanHistory, which escapes again, so
-    // reading the stored cells raw added one more leading apostrophe to a title,
-    // company or location starting with = + - or @ on every record.
-    const { url, portal, title, company, status, location } = parseScanHistoryLine(line);
-    if (!url) continue;
-    const key = normalizeUrl(url);
-    if (!knownByKey.has(key)) knownByKey.set(key, new Map());
-    // fingerprint is pinned empty rather than carried: it is discovery-time JD
-    // content, it still lives on the row being retired, and a stale copy on a
-    // dead row is only noise for the cross-listing check.
-    knownByKey.get(key).set(url, { url, source: portal, title, company, location, fingerprint: '' });
-    // The file is append-only and chronological, so the last row for a URL says
-    // what it is now. A later `added` row is a relisting: it un-retires the URL
-    // so a second death can be recorded, instead of the first retirement
-    // silencing every one after it. An empty status cell reads as `added`, the
-    // convention collectSeenUrls already uses.
-    if (EXPIRED_HISTORY_STATUS.test(status)) recorded.add(url);
-    else if ((status || 'added') === 'added') recorded.delete(url);
-  }
-
-  const rows = [];
-  const claimed = new Set();
-  for (const verdict of verdicts ?? []) {
-    if (verdict?.result !== 'expired' || isUnreadableVerdict(verdict)) continue;
-    const candidate = typeof verdict.url === 'string' ? verdict.url.trim() : '';
-    if (!candidate) continue;
-    const known = knownByKey.get(normalizeUrl(candidate));
-    if (!known) continue;
-    for (const [url, fields] of known) {
-      if (recorded.has(url) || claimed.has(url)) continue;
-      claimed.add(url);
-      rows.push(fields);
-    }
-  }
-  return rows;
 }
 
 export const DEFAULT_TRACKER_STATUSES = ['evaluated', 'applied'];
@@ -490,41 +404,4 @@ export function trackerLivenessTargets(trackerText, { statuses = DEFAULT_TRACKER
     targets.push({ num: row.num, company: row.company, role: row.role, status: row.status, url });
   }
   return { targets, noUrl };
-}
-
-export const DEFAULT_DISCARD_STATUSES = ['evaluated'];
-
-/**
- * Closed-posting note stamped onto Discarded rows.
- * @param {string} [day] YYYY-MM-DD (defaults to caller-supplied today)
- */
-export function postingClosedNote(day) {
-  return `posting closed ${day}`;
-}
-
-/**
- * Every tracker row in `statuses` whose posting URL is in `expiredUrls`.
- * Unlike trackerLivenessTargets, this keeps duplicate rows that share a URL
- * so a single expired verdict can discard every Evaluated copy.
- *
- * @param {string} trackerText
- * @param {Iterable<string>} expiredUrls
- * @param {{statuses?: string[], reportsRoot?: string}} [options]
- * @returns {{num: number, company: string, role: string, status: string, url: string}[]}
- */
-export function planExpiredDiscards(trackerText, expiredUrls, { statuses = DEFAULT_DISCARD_STATUSES, reportsRoot } = {}) {
-  const wanted = new Set(statuses.map((s) => s.trim().toLowerCase()).filter(Boolean));
-  const expired = new Set([...expiredUrls].filter(Boolean));
-  if (expired.size === 0 || wanted.size === 0) return [];
-  const lines = String(trackerText ?? '').split(/\r?\n/);
-  const colmap = resolveColumns(lines);
-  const rows = [];
-  for (const line of lines) {
-    const row = parseTrackerRow(line, colmap);
-    if (!row || !wanted.has(row.status.trim().toLowerCase())) continue;
-    const url = rowPostingUrl(row, reportsRoot);
-    if (!url || !expired.has(url)) continue;
-    rows.push({ num: row.num, company: row.company, role: row.role, status: row.status, url });
-  }
-  return rows;
 }

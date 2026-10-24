@@ -287,30 +287,6 @@ test('generate-pdf --batch: a malformed entry country fails that entry only', { 
   assert.equal(mediaBox(join(dir, 'output', 'b.pdf')), '595x842');
 });
 
-test('generate-cover-letter: the payload country steers auto, and --country outranks it', { skip: !chromiumReady && 'no Chromium' }, () => {
-  const letter = {
-    role_title: 'Head of Marketing', opening: 'Opening line.', profile_intro: 'Profile intro.',
-    company: 'Example Corp', city: 'Berlin', date: 'September 8, 2026',
-  };
-  const cases = [
-    { payloadCountry: 'DE', flag: [], box: '595x842' },
-    { payloadCountry: 'US', flag: [], box: '612x792' },
-    { payloadCountry: 'DE', flag: ['--country=US'], box: '612x792' },
-  ];
-  cases.forEach(({ payloadCountry, flag, box }, i) => {
-    const dir = workspace('auto');
-    const payloadPath = join(dir, 'payload.json');
-    writeFileSync(payloadPath, JSON.stringify({
-      candidate: { name: 'A Candidate' }, letter, country: payloadCountry, output_path: `output/cover-${i}.pdf`,
-    }));
-    const res = spawnSync(NODE, [join(ROOT, 'generate-cover-letter.mjs'), '--payload', payloadPath, ...flag], {
-      env: workspaceEnv(dir), encoding: 'utf-8',
-    });
-    assert.equal(res.status, 0, res.stderr + res.stdout);
-    assert.equal(mediaBox(join(dir, 'output', `cover-${i}.pdf`)), box, `${payloadCountry} ${flag}`);
-  });
-});
-
 test('generate-pdf: --country keeps everything after the prefix, so DE=US is rejected', () => {
   const res = runPdf(workspace('auto'), '--country=DE=US');
   assert.equal(res.status, 1);
@@ -329,22 +305,6 @@ function runCover(flags) {
     env: workspaceEnv(dir), encoding: 'utf-8',
   });
 }
-
-test('generate-cover-letter: a malformed or empty --country fails loudly', () => {
-  for (const flag of ['--country=Germany', '--country=DE=US', '--country=']) {
-    const res = runCover([flag]);
-    assert.equal(res.status, 1, flag + res.stdout);
-    assert.match(res.stderr, /Invalid country/, flag);
-  }
-});
-
-test('generate-cover-letter: --format takes only a4 or letter, never auto', () => {
-  for (const flag of ['--format=auto', '--format=legal']) {
-    const res = runCover([flag]);
-    assert.equal(res.status, 1, flag + res.stdout);
-    assert.match(res.stderr, /Invalid format/, flag);
-  }
-});
 
 test('generate-pdf --batch: a global --country covers an entry with none, and an entry format still wins', { skip: !chromiumReady && 'no Chromium' }, () => {
   const dir = workspace('auto');

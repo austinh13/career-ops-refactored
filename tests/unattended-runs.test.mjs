@@ -13,7 +13,7 @@ import { ROOT } from './helpers.mjs';
 
 const read = (path) => readFileSync(join(ROOT, path), 'utf8');
 const LINE = /^needs_confirmation: [a-z_]+ \S.* - [^?]+$/;
-const MODES = ['oferta', 'auto-pipeline', 'cover', 'apply', 'add', 'expand', 'intake', 'interview'];
+const MODES = ['oferta', 'auto-pipeline', 'add', 'expand', 'intake'];
 
 function unattendedParagraph(text) {
   const start = text.indexOf('**Unattended runs**');
@@ -40,7 +40,6 @@ test('_shared.md defines when a run is unattended and the one closing line', () 
 const GATE_DETAILS = {
   oferta: [/needs_confirmation: posting_closed /, /needs_confirmation: jd_unavailable /, /needs_confirmation: agency \{url or company\/role\} /],
   'auto-pipeline': [/needs_confirmation: posting_closed /, /needs_confirmation: jd_unavailable /, /needs_confirmation: agency \{url or company\/role\} /],
-  apply: [/needs_confirmation: blacklist /, /tailored CV/, /needs_confirmation: posting_closed /, /needs_confirmation: liveness_unverified /, /answers the prompt gives/i],
   add: [/needs_confirmation: add_input /, /unless the prompt already approves/i, /same source/i],
   expand: [/github-evidence\.mjs/, /unless the prompt already approves/i],
   intake: [/unless the prompt already approves/i],
@@ -69,9 +68,3 @@ for (const mode of MODES) {
     assert.ok(text.indexOf('**Unattended runs**') < text.indexOf('\n## '), 'the paragraph must come before the first step');
   });
 }
-
-test('the update check stays silent in an unattended run', () => {
-  const agents = read('AGENTS.md');
-  const check = agents.slice(agents.indexOf('## Update Check'), agents.indexOf('\n## ', agents.indexOf('## Update Check') + 1));
-  assert.match(check, /unattended run[^.]*say nothing/i);
-});

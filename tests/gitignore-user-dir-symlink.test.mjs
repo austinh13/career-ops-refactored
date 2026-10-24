@@ -64,7 +64,7 @@ try {
   // .gitignore does not untrack existing files, so these system scaffolds stay
   // in the index even though their paths are now ignored for new files.
   const trackedPlaceholders = [
-    'data/.gitkeep', 'data/offers/.gitkeep', 'data/parser-output/.gitkeep',
+    'data/.gitkeep',
     'output/.gitkeep', 'jds/.gitkeep', 'documents/.gitkeep', 'documents/README.md',
   ];
   for (const path of trackedPlaceholders) {
@@ -126,7 +126,7 @@ try {
     }
 
     const scaffolds = [
-      'data/.gitkeep', 'data/offers/.gitkeep', 'data/parser-output/.gitkeep',
+      'data/.gitkeep',
       'output/.gitkeep', 'jds/.gitkeep', 'documents/.gitkeep', 'documents/README.md',
     ];
     const claimed = scaffolds.filter(ignored);

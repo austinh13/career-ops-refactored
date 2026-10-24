@@ -79,8 +79,6 @@ Top 5 perubahan CV + Top 5 perubahan LinkedIn untuk memaksimalkan match.
 
 Kolom **Reflection** menangkap apa yang dipelajari atau apa yang akan dilakukan berbeda. Ini menandakan senioritas -- yang junior menggambarkan apa yang terjadi, yang senior menarik pelajaran darinya.
 
-**Story Bank:** Jika `interview-prep/story-bank.md` ada, cek apakah story ini sudah tercatat. Jika belum, tambahkan yang baru. Seiring waktu, ini membangun bank 5-10 master story yang bisa dipakai ulang dan disesuaikan untuk pertanyaan wawancara apa pun.
-
 **Dipilih dan dibingkai sesuai arketipe:**
 - FDE -> tonjolkan kecepatan delivery dan kedekatan dengan klien
 - SA -> tonjolkan keputusan arsitektur

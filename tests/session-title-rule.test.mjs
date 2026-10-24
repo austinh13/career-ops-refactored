@@ -36,24 +36,13 @@ check('opt-out key is documented in the rule', section.includes('`session_title:
 
 const scopeLine = section.match(/^- \*\*Scope:\*\* (.*)$/m)?.[1] ?? '';
 const [inScope, outOfScope] = scopeLine.split('Skip');
-for (const mode of ['auto-pipeline', 'oferta', 'pdf', 'apply', 'contacto', 'interview-prep']) {
+for (const mode of ['auto-pipeline', 'oferta', 'pdf']) {
   check(`\`${mode}\` is in scope`, (inScope ?? '').includes(`\`${mode}\``));
 }
-for (const mode of ['scan', 'pipeline', 'batch', 'ofertas']) {
+for (const mode of ['pipeline', 'batch', 'ofertas']) {
   check(`multi-posting \`${mode}\` is skipped`, (outOfScope ?? '').includes(`\`${mode}\``));
 }
 check('delegated/headless workers never rename', /worker never renames anything/.test(outOfScope ?? ''));
-
-// `apply` is in scope but runs in a worker when Playwright drives the form, so
-// the parent has to get the role and employer back or nothing ever renames.
-const delegated = skill.split('### Modes delegated to subagent')[1]?.split('\n## ')[0] ?? '';
-check('delegated `apply` hands role and employer back to the parent for the rename',
-  /For `apply` \(with Playwright\), ask the worker to return the role title and employer/.test(delegated)
-    && /parent then applies \*\*Session Title\*\*/.test(delegated));
-check('delegated `apply` also returns the agency, and the parent waits for its confirmation',
-  /and any agency the posting came through/.test(delegated)
-    && /parent then applies \*\*Session Title\*\* from those values, after any agency confirmation has resolved/.test(delegated));
-check('delegated `apply` worker never renames', /The worker never renames anything itself/.test(delegated));
 
 // The point in the flow where the role and employer first become known.
 // Each pointer must also keep the agency deferral, or it reads as "title at

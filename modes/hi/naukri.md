@@ -83,8 +83,6 @@ Offer की requirements पर mapped 6-10 STAR+R stories (STAR + **Reflection
 
 **Reflection** column वह capture करता है जो सीखा गया या अलग किया जाता। यह seniority signal करता है — juniors describe करते हैं क्या हुआ, seniors उससे lessons लेते हैं।
 
-**Story Bank:** यदि `interview-prep/story-bank.md` मौजूद है, check करें कि ये stories पहले से वहाँ हैं या नहीं। यदि नहीं, तो नई stories add करें। समय के साथ, यह 5-10 master stories का reusable bank बन जाता है।
-
 **Archetype के अनुसार selected और framed:**
 - FDE → delivery speed और client proximity highlight करें
 - SA → architecture decisions highlight करें

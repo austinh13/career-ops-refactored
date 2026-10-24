@@ -26,10 +26,9 @@ if (mode === 'report') {
   report();
 } else if (mode === 'writer') {
   // A real writer, run from the checkout through run() with no env of its own:
-  // the shape of the smoke test that appended to the developer's assessments.
-  const out = run(NODE, [join(ROOT, 'assessment-log.mjs'), 'add', '--company', 'Acme-Co',
-    '--platform', 'eSkill', '--subject', 'Data-Analysis', '--threshold', '70', '--score', '85']);
-  console.log(`ADDED=${out !== null && JSON.parse(out).added === true}`);
+  // the shape of the smoke test that wrote into the developer's data root.
+  const out = run(NODE, [join(ROOT, 'reserve-report-num.mjs')]);
+  console.log(`ADDED=${out !== null && /^\d+/.test(out.trim())}`);
   report();
 } else if (mode === 'nested') {
   // A child of this process loads the helpers too, as a node:test suite

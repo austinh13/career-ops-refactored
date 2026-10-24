@@ -79,8 +79,6 @@ Top 5 zmian w CV + Top 5 zmian na LinkedIn, aby zmaksymalizować dopasowanie.
 
 Kolumna **Reflection** ujmuje, czego się nauczono lub co zrobiono by inaczej. To sygnalizuje seniority -- juniorzy opisują, co się wydarzyło, seniorzy wyciągają z tego wnioski.
 
-**Story Bank:** Jeśli `interview-prep/story-bank.md` istnieje, sprawdź, czy te historie już tam są. Jeśli nie, dodaj nowe. Z czasem buduje to wielokrotnego użytku bank 5-10 historii master, które można dopasować do każdego pytania na rozmowie.
-
 **Wyselekcjonowane i sformowane według archetypu:**
 - FDE -> podkreśl szybkość dostarczania i bliskość klienta
 - SA -> podkreśl decyzje architektoniczne

@@ -44,14 +44,14 @@ test('the batch worker prompt forbids writes to every user rule and profile file
 });
 
 for (const file of ['modes/_shared.md', 'modes/pdf.md']) {
-  test(`${file} sends a lasting preference through retro, and only in an interactive session`, () => {
+  test(`${file} records a lasting preference only after the user accepts it, and only in an interactive session`, () => {
     const sentences = read(file).split(/(?<=\.\*{0,2})\s+/);
     const direct = sentences.filter((s) => /write (it|them) (to|into) `modes\/_custom\.md`/.test(s));
-    assert.deepEqual(direct, [], `${file} still writes a preference straight to _custom.md instead of through retro`);
-    const viaRetro = sentences.filter((s) => /`retro`/.test(s) && /`modes\/_custom\.md`/.test(s));
+    assert.deepEqual(direct, [], `${file} still writes a preference straight to _custom.md without the user's acceptance`);
+    const viaRetro = sentences.filter((s) => /\b(accepts|confirms)\b/.test(s) && /`modes\/_custom\.md`/.test(s));
     assert.ok(viaRetro.length > 0, `${file} no longer tells the agent where lasting preferences go; update this test`);
     for (const s of viaRetro) {
-      assert.match(s, /interactive session/i, `this retro instruction has no interactive-only scope: ${s}`);
+      assert.match(s, /interactive session/i, `this preference instruction has no interactive-only scope: ${s}`);
     }
     const workerRules = sentences.filter((s) => /worker\b.*\bnever writes\b/.test(s));
     assert.ok(workerRules.length > 0, `${file} does not say what a delegated or batch worker must not write`);

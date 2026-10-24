@@ -6,12 +6,8 @@ import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { pathToFileURL } from 'node:url';
 import { ROOT } from './helpers.mjs';
-import { discardExpiredRows } from '../check-liveness.mjs';
 import {
   trackerLivenessTargets,
-  planExpiredDiscards,
-  postingClosedNote,
-  DEFAULT_DISCARD_STATUSES,
 } from '../liveness-core.mjs';
 
 const tracker = [
@@ -65,36 +61,6 @@ test('--tracker without a tracker file says so and exits 1', (t) => {
   assert.doesNotMatch(result.stderr, /Usage:/);
 });
 
-test('planExpiredDiscards keeps every Evaluated row that shares an expired URL', (t) => {
-  const root = reportsRoot(t);
-  const rows = planExpiredDiscards(tracker, ['https://jobs.example.test/acme/3'], { reportsRoot: root });
-  assert.deepEqual(rows.map((row) => row.num), [3, 5]);
-  assert.equal(rows.every((row) => row.url === 'https://jobs.example.test/acme/3'), true);
-});
-
-test('planExpiredDiscards ignores Applied even when that posting expired', (t) => {
-  const root = reportsRoot(t);
-  const rows = planExpiredDiscards(
-    tracker,
-    ['https://jobs.example.test/globex/2', 'https://jobs.example.test/acme/3'],
-    { reportsRoot: root },
-  );
-  assert.deepEqual(rows.map((row) => row.num), [3, 5]);
-  assert.deepEqual(DEFAULT_DISCARD_STATUSES, ['evaluated']);
-});
-
-test('postingClosedNote stamps the calendar day', () => {
-  assert.equal(postingClosedNote('2026-10-14'), 'posting closed 2026-10-14');
-});
-
-test('--discard-expired without --tracker exits 1', () => {
-  const result = spawnSync(process.execPath, [join(ROOT, 'check-liveness.mjs'), '--discard-expired', '--no-record'], {
-    encoding: 'utf8', timeout: 20_000,
-  });
-  assert.equal(result.status, 1, result.stdout + result.stderr);
-  assert.match(result.stderr, /requires --tracker/);
-});
-
 const EXPIRED_URL = 'https://job-boards.greenhouse.io/acme/jobs/1';
 const LIVE_URL = 'https://job-boards.greenhouse.io/globex/jobs/2';
 
@@ -126,54 +92,3 @@ function discardSandbox(t, rows, reportUrls) {
   );
   return { trackerPath, reportsDir, run };
 }
-
-test('--tracker --discard-expired dry-runs set-status and leaves the tracker unchanged', (t) => {
-  const { trackerPath, run } = discardSandbox(t, [
-    '| 1 | 2026-09-01 | Acme | Engineer | 4.0/5 | Evaluated | ❌ | [1](../reports/001-acme.md) | |',
-    '| 2 | 2026-09-02 | Globex | Engineer | 4.0/5 | Evaluated | ❌ | [2](../reports/002-globex.md) | |',
-    '| 3 | 2026-09-03 | Acme | Engineer | 4.0/5 | Applied | ❌ | [3](../reports/003-acme.md) | |',
-  ], { '001-acme.md': EXPIRED_URL, '002-globex.md': LIVE_URL, '003-acme.md': EXPIRED_URL });
-  const before = readFileSync(trackerPath, 'utf8');
-  const result = run();
-  const discardSection = result.stdout.split('Discard expired')[1] ?? '';
-  assert.match(result.stdout, /Discard expired \(dry-run\): 1 Evaluated row/, result.stdout + result.stderr);
-  assert.match(discardSection, /#1 Acme · Engineer — would discard \(posting closed \d{4}-\d{2}-\d{2}\)/);
-  assert.doesNotMatch(discardSection, /#2 Globex|#3 Acme/);
-  assert.equal(readFileSync(trackerPath, 'utf8'), before);
-});
-
-test('--tracker --discard-expired --apply writes Discarded with the closed note', (t) => {
-  const { trackerPath, run } = discardSandbox(t, [
-    '| 1 | 2026-09-01 | Acme | Engineer | 4.0/5 | Evaluated | ❌ | [1](../reports/001-acme.md) | |',
-    '| 2 | 2026-09-02 | Globex | Engineer | 4.0/5 | Evaluated | ❌ | [2](../reports/002-globex.md) | |',
-  ], { '001-acme.md': EXPIRED_URL, '002-globex.md': LIVE_URL });
-  const result = run('--apply');
-  assert.match(result.stdout, /#1 Acme · Engineer — discarded \(posting closed /, result.stdout + result.stderr);
-  const rows = readFileSync(trackerPath, 'utf8').split('\n').filter((line) => /^\| [12] \|/.test(line));
-  assert.match(rows[0], /\| Discarded \|.*posting closed \d{4}-\d{2}-\d{2}/);
-  assert.match(rows[1], /\| Evaluated \|/);
-});
-
-test('a Report link whose label and target disagree is not trusted for a posting URL', (t) => {
-  const { trackerPath, reportsDir } = discardSandbox(t, [
-    '| 7 | 2026-09-07 | Initech | Engineer | 4.0/5 | Evaluated | ❌ | [7](../reports/008-initech.md) | |',
-    '| 8 | 2026-09-08 | Initech | Analyst | 4.0/5 | Applied | ❌ | [8](../reports/008-initech.md) | |',
-  ], { '008-initech.md': EXPIRED_URL });
-  const text = readFileSync(trackerPath, 'utf8');
-  assert.deepEqual(planExpiredDiscards(text, [EXPIRED_URL], { reportsRoot: reportsDir }), []);
-  assert.deepEqual(trackerLivenessTargets(text, { reportsRoot: reportsDir }).noUrl, [7]);
-});
-
-test('--apply leaves a row that moved out of Evaluated after the check', (t) => {
-  const { trackerPath, reportsDir } = discardSandbox(t, [
-    '| 1 | 2026-09-01 | Acme | Engineer | 4.0/5 | Applied | ❌ | [1](../reports/001-acme.md) | |',
-  ], { '001-acme.md': EXPIRED_URL });
-  const before = readFileSync(trackerPath, 'utf8');
-  const planned = [{ num: 1, company: 'Acme', role: 'Engineer', status: 'Evaluated', url: EXPIRED_URL }];
-  const results = discardExpiredRows(planned, { apply: true, note: 'posting closed 2026-10-14', trackerPath, reportsRoot: reportsDir });
-  assert.deepEqual(results, [{
-    num: 1, company: 'Acme', role: 'Engineer', url: EXPIRED_URL, changed: false, dryRun: false,
-    skipped: 'no longer Evaluated with this posting',
-  }]);
-  assert.equal(readFileSync(trackerPath, 'utf8'), before);
-});

@@ -81,8 +81,6 @@ WebSearch를 사용합니다.
 
 **Reflection** 열은 무엇을 배웠는지 또는 다시 한다면 무엇을 다르게 할지를 담습니다. 이는 seniority를 보여주는 신호입니다. junior는 무슨 일이 있었는지를 설명하고, senior는 그 경험에서 무엇을 배웠는지까지 설명합니다.
 
-**Story Bank:** `interview-prep/story-bank.md`가 있으면 해당 story들이 이미 있는지 확인합니다. 없으면 새 story를 추가합니다. 시간이 지나면 어떤 면접 질문에도 재사용 가능한 5-10개의 master story bank가 만들어집니다.
-
 **Archetype에 맞춰 선택하고 framing합니다:**
 - FDE -> delivery 속도와 고객 접점을 강조
 - SA -> architecture decision을 강조

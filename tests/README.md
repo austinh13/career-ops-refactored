@@ -5,7 +5,7 @@ Auto-discovered test files for the career-ops suite.
 ## Purpose
 
 `test-all.mjs` (repo root) is the suite runner: it executes its inline core
-checks (syntax, scripts, dashboard, data contract, personal data, paths) and
+checks (syntax, scripts, data contract, personal data, paths) and
 then auto-discovers every `*.test.mjs` file under this directory. There is no
 test framework by design — the suite must run on a fresh clone with only
 Node.js (`tests/helpers.mjs`).
@@ -17,42 +17,23 @@ Node.js (`tests/helpers.mjs`).
   `NODE` (current Node binary).
 - `run-discovered-child.mjs` — not a suite. `test-all.mjs` starts it once per
   discovered suite when suites run in parallel (see "Parallel runs" below).
-- `providers/{name}.test.mjs` — one file per scanner provider (see
-  [providers/ADDING_A_PROVIDER.md](../providers/ADDING_A_PROVIDER.md) for the
-  test pattern), plus shared cross-provider tests such as
-  `ats-ssrf-hardening.test.mjs`.
-  Underscore-prefixed files (e.g. `_html-entities.test.mjs`) test shared
-  helper modules.
-- Other `*.test.mjs` files at this level (e.g. `stats.test.mjs`) cover root
+- `providers/*.test.mjs` — tests for the few ATS parsers and shared HTTP guards
+  kept for JD extraction and liveness (`greenhouse`, `zoho-recruit`,
+  `weworkremotely`, `_http`, ...), plus `ats-ssrf-hardening`-style
+  cross-provider checks.
+- Other `*.test.mjs` files at this level (e.g. `merge-tracker.test.mjs`) cover root
   scripts. Note: standalone `*.test.mjs` files in the repo root are not
   discovered and will not run — `tests/no-root-suites.test.mjs` fails the
   build if one shows up (see "Why the flat root" in ARCHITECTURE.md).
-  A handful of `*-tests.mjs` suites do remain at the root (a flag-driven CI
-  harness, a suite that asserts on its own filename, two needing a per-script
-  timeout, and one added after the convention was written); those are registered in
-  `test-all.mjs`'s `scripts` list or invoked by a workflow, and
-  `root-tests-registration.test.mjs` asserts every one of them is reachable.
 
-**Web tests do not live here.** `web/` runs its own `npm test` over
-`web/tests/**/*.test.mjs` (see [../web/README.md](../web/README.md)); this
-directory is for the core. Web suites use `node:test`. Suites here may use
-either the `pass`/`fail` helpers or `node:test`, which ships with Node, so both
-run on a bare clone: `test-all.mjs` imports a `pass`/`fail` suite and runs a
-`node:test` suite in a child process under `node --test`, folding its exit code
-into the totals (#2463). `tests/helpers.mjs` is for this directory only; web
-suites do not import it.
-
-The one exception to the split is a guard *about* web's layout —
-`web-test-layout.test.mjs` lives here on purpose, because `web-ci.yml` is
-informative by design and never blocks a merge, while `test-all.mjs` runs on
-every PR as a required check.
+Suites here may use either the `pass`/`fail` helpers or `node:test`, which ships with Node, so both run on a bare clone: `test-all.mjs` imports a `pass`/`fail` suite and runs a `node:test` suite in a child process under `node --test`, folding its exit code into the totals (#2463).
 
 ## Running
 
 ```bash
 node test-all.mjs                            # full suite — run before pushing
-node test-all.mjs --quick                    # full suite, skip dashboard build
-node test-all.mjs --only providers/themuse   # only matching tests/ files
+node test-all.mjs --quick                    # full suite, skip slow extras
+node test-all.mjs --only providers/greenhouse   # only matching tests/ files
 node test-all.mjs --quick --jobs 4           # at most 4 suites at a time
 ```
 

@@ -79,8 +79,6 @@ Top 5 modifications du CV + Top 5 modifications LinkedIn pour maximiser le match
 
 La colonne **Reflection** capture ce qui a ete appris ou ce qui serait fait differemment. Cela signale la seniorite -- les juniors decrivent ce qui s'est passe, les seniors en tirent des enseignements.
 
-**Story Bank :** Si `interview-prep/story-bank.md` existe, verifier si ces stories y sont deja. Sinon, ajouter les nouvelles. Avec le temps, cela construit une banque reutilisable de 5-10 stories maitre adaptables a n'importe quelle question d'entretien.
-
 **Selectionnees et cadrees selon l'archetype :**
 - FDE -> mettre en avant la vitesse de livraison et la proximite client
 - SA -> mettre en avant les decisions d'architecture

@@ -237,42 +237,18 @@ const COMMENT_LINE = /^\s*(\/\/|\*|\/\*)/;
 // A filter rather than six EXEMPT entries, because those scripts live on
 // `main` and not on every branch, and the dead-entry check below reads each
 // exempt path off disk. A filter compares strings and never touches one.
-const SPARSE_CHECKOUT_SCRIPTS = new Set([
-  '.github/scripts/ci-approve.mjs',
-  '.github/scripts/depends-on.mjs',
-  '.github/scripts/direction-gate.mjs',
-  '.github/scripts/gfi-handoff.mjs',
-  '.github/scripts/label-bot.mjs',
-  '.github/scripts/triage.bundle.mjs',
-]);
-
 const repoSources = () =>
-  trackedFiles(ROOT, (rel) => rel.endsWith('.mjs') && !SPARSE_CHECKOUT_SCRIPTS.has(rel));
+  trackedFiles(ROOT, (rel) => rel.endsWith('.mjs'));
 
 // Every exemption carries its reason; an unexplained entry is a review smell.
 const EXEMPT = new Map([
   // The helper is the one place allowed to read the entry path.
   ['lib/is-main-module.mjs', 'is the comparison'],
-  // #1706 requires update-system.mjs to be self-loading (a pre-#1245 client
-  // checks out this single file and re-execs it), so it inlines the guard
-  // instead of importing it. The exemption covers the source scan ONLY; the
-  // behaviour test at the bottom of this file pins its semantics.
-  ['update-system.mjs', 'self-loading per #1706; behaviour-pinned below'],
-  // Cookbook parsers are copied outside the repository into gitignored local/.
-  // They must remain standalone, so they cannot import the core helper.
-  ['docs/recipes/gojobs/parse-gojobs-html.mjs', 'standalone cookbook file copied into local/'],
   // This file quotes the pattern in its detector self-test and error messages.
   ['tests/main-guard-convention.test.mjs', 'quotes the pattern to test the detector'],
-  // Assigns argv[1] inside a spawned child's preamble so the copied script's
-  // main-guard fires under `node -e` — the child's entry path, not a guard.
-  ['tests/scan-ats-full-outage-checkpoint.test.mjs', 'sets a child process\u2019s argv[1] in a spawn preamble'],
   // Asserts that a bash-embedded node snippet reads its input file via ITS OWN
   // argv[1] (injection safety, not a main-guard); the literal lives in strings.
   ['tests/batch-runner-jd-prefetch.test.mjs', 'asserts another script\u2019s argv[1] usage in strings'],
-  // Spawns lib/api.mjs via `node -e` to test it under specific env vars; the
-  // -e script imports the module from ITS OWN argv[1], the URL passed as the
-  // next execFile array element. Not this file's main-guard.
-  ['tests/plugins/h1b-sponsor.test.mjs', 'imports a module via a spawned child\u2019s own argv[1] in -e scripts'],
 ]);
 
 function entryRefViolations(src) {
@@ -291,17 +267,6 @@ test('no file outside the helper reads the process entry path', () => {
   // already throws on an empty LISTING; this pins the enforced slice of it, so a
   // filter typo cannot quietly take every entrypoint out of scope.
   assert.ok(files.length > 100, `expected the tracked .mjs tree, got ${files.length} files`);
-  // The control for the four-name exclusion above. sponsors.mjs is the one
-  // script in that directory with the whole tree on disk when it runs, so it
-  // can import the helper, and this branch changed it to. Collapse the four
-  // names back into a `.github/` skip and this is what goes red, instead of
-  // the guard quietly dropping the file the branch just fixed. Asserted
-  // unconditionally, the same stance the dead-entry check below takes.
-  assert.ok(
-    files.some((f) => relative(ROOT, f).split('\\').join('/') === '.github/scripts/sponsors.mjs'),
-    'sponsors.mjs runs from a full checkout and must stay inside the enforced set',
-  );
-
   const offenders = [];
   for (const file of files) {
     const rel = relative(ROOT, file).split('\\').join('/');
@@ -370,37 +335,5 @@ test('the #1706 static-import detector sees every spelling', () => {
   ];
   for (const form of allowed) {
     assert.ok(!STATIC_RELATIVE_IMPORT.test(form), `false positive on:\n${form}`);
-  }
-});
-
-test("update-system.mjs's inlined guard realpaths both sides", (t) => {
-  // The #1706 self-loading rule buys it an exemption from the import, not from
-  // being correct. Asserted on BEHAVIOUR, not on source text: a source-shape
-  // check passes on a rewrite that keeps the words and loses the realpath.
-  const src = readFileSync(join(ROOT, 'update-system.mjs'), 'utf-8');
-  assert.ok(
-    !STATIC_RELATIVE_IMPORT.test(src),
-    'update-system.mjs grew a static relative import — that breaks the old→new re-exec (#1706)',
-  );
-
-  const linked = linkedRoot('main-guard-updater-');
-  if (!linked) return t.skip('directory symlinks unavailable on this machine');
-  const { link, cleanup } = linked;
-  try {
-    // An unrecognized subcommand is the only branch that proves the tail ran
-    // and writes NOTHING: `check` hits the network, and every other command
-    // (`dismiss` included) touches the real repo through the symlink.
-    const viaLink = spawnSync(process.execPath, [join(link, 'update-system.mjs'), '--probe-not-a-command'], {
-      cwd: ROOT, encoding: 'utf-8', timeout: 60_000,
-    });
-    assert.match(
-      viaLink.stdout,
-      /Usage: node update-system\.mjs/,
-      `the updater printed no usage through a symlink (exit ${viaLink.status}) — its inlined ` +
-        'guard stopped realpathing both sides, and every update silently no-ops (#3170)',
-    );
-    assert.equal(viaLink.status, 1, 'the usage branch must still exit non-zero');
-  } finally {
-    cleanup();
   }
 });

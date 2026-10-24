@@ -184,7 +184,7 @@ Sự bất đối xứng có chủ ý và chạy một chiều: tăng importance
 
 ### Cột Match — ranh giới nguồn sự thật
 
-`Match` là một nhận định về ứng viên, nên chỉ đến từ các file **chính**: `cv.md`, `article-digest.md`, `config/profile.yml`, `modes/_profile.md`. Một `✅ Strong` **không được** dựa trên số liệu từ `interview-prep/story-bank.md` nếu nó được đánh dấu, hoặc mặc định là, `derived-unverified` hay `user-cannot-confirm` -- dòng đó là `⚠️ Partial`. Xem Source-of-Truth Boundary trong `AGENTS.md`.
+`Match` là một nhận định về ứng viên, nên chỉ đến từ các file **chính**: `cv.md`, `article-digest.md`, `config/profile.yml`, `modes/_profile.md`.
 
 ### Nội dung không đáng tin
 
@@ -320,8 +320,6 @@ Top 5 thay đổi cho CV + Top 5 thay đổi cho LinkedIn để tối đa hóa �
 |---|------------|-------------------|---|---|---|---|------------|
 
 Cột **Reflection** ghi lại điều đã học hoặc điều sẽ làm khác đi. Điều này thể hiện độ senior -- người junior mô tả chuyện gì đã xảy ra, người senior rút ra bài học.
-
-**Story Bank:** Nếu có `interview-prep/story-bank.md`, kiểm tra xem các câu chuyện này đã có chưa. Nếu chưa, thêm vào. Theo thời gian, điều này xây thành bộ 5-10 câu chuyện gốc dùng lại và điều chỉnh được cho mọi câu hỏi phỏng vấn.
 
 **Chọn và định khung theo archetype:**
 - FDE → nhấn mạnh tốc độ delivery và làm việc với khách hàng
@@ -514,17 +512,6 @@ Tín hiệu này **có thể** kéo tầng bên dưới về **Suspicious** khi 
 
 **Context Notes:** Mọi lưu ý (vai trò ngách, tin nhà nước, tin tuyển liên tục...) giải thích các tín hiệu có vẻ đáng ngại.
 
-### Prior-contact FYI (không tính điểm)
-
-Kiểm tra trục `responsiveness` của thẻ `node company-history.mjs --company <company>`, truyền tên công ty như một đối số riêng được trích dẫn -- không bao giờ ghép vào chuỗi shell dài hơn, vì tên công ty có thể chứa dấu nháy, `$`, backtick hay `;`. Rẽ nhánh theo `responsiveness.label` và thêm MỘT dòng thông tin vào báo cáo. Mảng `facts` có thể chứa nhiều đơn ứng tuyển vào cùng công ty, nên điền placeholder theo **từng loại**: dùng đơn gần nhất khớp điều kiện riêng của placeholder đó -- placeholder "đã phản hồi" điền từ fact đã phản hồi gần nhất, placeholder "im lặng" điền từ fact im lặng gần nhất.
-
-- `silent-on-you` (điền từ fact im lặng gần nhất; nếu có nhiều hơn một đơn im lặng, thêm số lượng các đơn còn lại):
-> Note: you applied to {company} on {date}; no response in {N}d after {M} follow-ups. Not a legitimacy signal — factor into how much effort to invest.
-- `mixed` (họ đã trả lời ít nhất một đơn của bạn và im lặng với đơn khác):
-> Note: mixed history with {company} — they responded on #{responded_num} ({responded_date}) but went silent on #{silent_num} (applied {silent_date}, {N}d). Not a legitimacy signal — factor into how much effort to invest.
-
-Đây là thông tin về **lịch sử của chính bạn** với công ty, không phải về tin này. Nó KHÔNG được làm thay đổi điểm 1-5 và KHÔNG được làm thay đổi tầng Assessment ở trên. Nếu label là `responded-before` hoặc `no-history`, không nói gì.
-
 ### Xử lý các trường hợp biên:
 - **Tin nhà nước / trường đại học:** Mốc thời gian dài hơn là bình thường. Điều chỉnh ngưỡng (60-90 ngày là bình thường).
 - **Tin tuyển liên tục (evergreen):** Nếu JD nêu rõ "tuyển liên tục" hoặc "rolling", ghi chú như bối cảnh -- đây không phải tin ma, mà là vai trò tạo nguồn ứng viên.
@@ -570,7 +557,6 @@ Ba trạng thái mỗi dòng: `✅ {kết luận rõ}` / `⚠️ {phát hiện}`
 | Posting legitimacy | Tầng đánh giá Block G | `✅ High Confidence`, hoặc `⚠️ {tầng} — {lý do một dòng}` với Proceed with Caution / Suspicious |
 | Employment classification | Tín hiệu phân loại việc làm trong Block G | `✅ clear` khi kiểm tra đã chạy và không thấy gì; `⚠️ contractor-style language: "{cụm trích}"` khi cờ kích hoạt; `— not evaluated` khi không chạy được |
 | Culture screen | Trường Culture screen ở Block A | `✅ pass`, hoặc `⚠️ caution — {bằng chứng}` / `⚠️ fail — {bằng chứng}`; `— not evaluated` nếu chưa sàng lọc |
-| Interview red flags | `interview-prep/{company-slug}-redflags.md` (từ mode `interview-redflag`) | **Tham chiếu chéo, không sao chép:** nếu file tồn tại, hiển thị mức cảnh báo hiện tại cùng liên kết tương đối `[{level}](../interview-prep/{company-slug}-redflags.md)`; nếu không `— no interview sessions yet` |
 | AI claims vs. infrastructure | Kiểm tra lệch AI/hạ tầng trong Block G, khi có | Nếu báo cáo có kiểm tra này, phản chiếu kết luận (`✅ consistent` / `⚠️ {phát hiện}`); nếu không `— not evaluated` |
 | AI-screening disclosure | Tín hiệu công bố sàng lọc AI trong Block G (Signal 15), khi có | Nếu báo cáo có kiểm tra: `✅ discloses AI use` khi (a) kích hoạt, `ℹ️ {jurisdiction_name} requires disclosure; posting is silent` khi chỉ (b), `— no jurisdiction match` khi không bên nào kích hoạt vì khu vực không có dòng bảng; nếu không `— not evaluated` |
 
@@ -584,68 +570,10 @@ Ba trạng thái mỗi dòng: `✅ {kết luận rõ}` / `⚠️ {phát hiện}`
 | Posting legitimacy | ✅ High Confidence |
 | Employment classification | ⚠️ contractor-style language: "{quoted phrase}" |
 | Culture screen | ⚠️ caution — {evidence} |
-| Interview red flags | — no interview sessions yet |
 | AI claims vs. infrastructure | — not evaluated |
 ```
 
 Phản chiếu khối này vào `## Machine Summary` dưới dạng map `risk_summary:` (tên key và giá trị enum chính xác trong `batch/batch-prompt.md`, nguồn sự thật của Machine Summary) để script phía sau dùng mà không phải phân tích lại văn xuôi.
-
----
-
-## Cover Letter Draft (tự tạo sau Block G)
-
-Sau khi lưu báo cáo và ghi vào tracker, thêm bản nháp cover letter vào file báo cáo dưới `## Cover Letter Draft`. Đây là điểm khởi đầu, không phải thư cuối. Người dùng hoàn thiện bằng `/career-ops cover {slug}`.
-
-**Cách tạo bản nháp:**
-
-1. Đọc `cv.md` -- chọn 4 gạch đầu dòng thành tích liên quan nhất đến các yêu cầu hàng đầu của JD (đúng nguyên văn, chỉ số liệu thật)
-2. Đọc `config/profile.yml` -- lấy tên ứng viên, vai trò hiện tại, số năm kinh nghiệm
-3. Viết phần mở đầu 2 câu dựa trên chức danh và ngôn ngữ sứ mệnh của JD
-4. Viết 1 đoạn giới thiệu bản thân từ summary trong cv.md, điều chỉnh theo lĩnh vực của JD
-5. Để trống phần "Vấn đề / Vì sao công ty này / Cách tiếp cận" như placeholder -- cần người dùng đóng góp
-6. Phát hiện và gắn cờ mọi khoảng trống (lệch lĩnh vực, yêu cầu ngôn ngữ, mức khẩn của ngày bắt đầu) để người dùng thấy ngay
-
-**Định dạng bản nháp thêm vào báo cáo:**
-
-```markdown
-## Cover Letter Draft
-
-> Draft generated at evaluation time. Complete via `/career-ops cover {slug}` to fill in angles, confirm research, and generate the PDF.
-> Gaps flagged below — address them during the cover flow.
-
----
-
-**Opening** *(placeholder — refine with your "why this role" angle)*
-{2 câu mở đầu dựa trên chức danh và ngôn ngữ sứ mệnh của JD}
-
-**Profile introduction**
-{1 đoạn từ summary trong cv.md, điều chỉnh theo lĩnh vực và năng lực yêu cầu của JD}
-
-**Key achievements** *(selected from cv.md — exact wording preserved)*
-- **{ý chính từ cv.md},** {câu tác động kèm số liệu}.
-- **{ý chính từ cv.md},** {câu tác động kèm số liệu}.
-- **{ý chính từ cv.md},** {câu tác động kèm số liệu}.
-- **{ý chính từ cv.md},** {câu tác động kèm số liệu}.
-
-**Problems I will solve** *(placeholder — requires company research + your input)*
-> To be completed: what challenges does {company} face that you'd address? How would you approach them?
-
-**Closing**
-Rất mong có cơ hội trao đổi thêm vào thời điểm thuận tiện cho Anh/Chị.
-
----
-
-**Gaps flagged:**
-{Liệt kê mọi khoảng trống đã phát hiện -- lệch lĩnh vực, yêu cầu ngôn ngữ, ngày bắt đầu khẩn, lệch chức danh. Nếu không có, ghi "None detected."}
-
-**JD keywords to mirror** *(extracted for ATS + human read)*
-{8-10 cụm nguyên văn từ JD}
-
----
-*Run `/career-ops cover {slug}` to complete angles, confirm company research, and generate the PDF.*
-```
-
-Áp dụng mọi quy tắc ngôn ngữ trong phần Professional Writing của `_writing.md` và phần "Viết chuyên nghiệp và tương thích ATS" của `_shared.md` cho nội dung bản nháp. Không dùng em dash, không sáo ngữ, câu chủ động, chỉ nhận định cụ thể.
 
 ---
 
@@ -721,11 +649,6 @@ Lưu bản đánh giá đầy đủ vào `reports/{###}-{company-slug}-{YYYY-MM-
 ## Score Evidence
 (năm chiều chấm điểm, trạng thái bằng chứng và nguồn, câu hỏi chưa giải quyết, tầng evidence-confidence và ưu tiên xác minh)
 
-## H) Draft Application Answers
-(chỉ khi điểm >= 4.5 -- bản nháp trả lời cho form ứng tuyển)
-
----
-
 ## Keywords extracted
 (danh sách 15-20 từ khóa từ JD để tối ưu ATS)
 
@@ -781,21 +704,3 @@ Với cột Via tùy chọn (kênh trung gian, #1596) sau Company:
 ```markdown
 | # | Date | Company | Via | Role | Score | Status | PDF | Report | Notes |
 ```
-
-### 3. Quan sát lương (chỉ mức mong muốn)
-
-Nếu -- và chỉ nếu -- người dùng **nêu rõ một con số mong muốn riêng cho vai trò này** trong cuộc trò chuyện ("tôi sẽ xin 45 triệu ở đây"), thêm một dòng `desired` (nguồn `user`) vào `data/salary-observations.tsv` (tạo file nếu chưa có; định dạng theo `docs/SCRIPTS.md` → salary-gap):
-
-```text
-{tracker#}\t{YYYY-MM-DD}\tdesired\t{amount}\t{currency}\tuser\t{ghi chú ngữ cảnh ngắn}
-```
-
-Không bao giờ suy ra con số mong muốn từ JD, điểm số hay các cuộc trò chuyện trước. Mặc định của hồ sơ (`config/profile.yml` → `compensation.target_range`) không cần dòng nào -- `salary-gap.mjs` đọc nó như fallback. Con số công bố cũng không cần dòng: `advertised_comp` của báo cáo **chính là** quan sát công bố.
-
----
-
-## Block H — Bản nháp trả lời form ứng tuyển (Draft Application Answers)
-
-Chỉ tạo khi điểm toàn cục >= 4.5 và form ứng tuyển có ô trả lời tự do. Tiêu đề phần trong báo cáo là `## H) Draft Application Answers` (giữ nguyên tiếng Anh để `application-answers.mjs` đọc được).
-
-Mỗi câu hỏi của form là một mục đậm riêng (`**Câu hỏi nguyên văn?**`) theo sau là câu trả lời. Trả lời chỉ từ các file nguồn chính (`cv.md`, `article-digest.md`, `config/profile.yml`, `modes/_profile.md`) và điều người dùng nói trực tiếp trong cuộc trò chuyện -- không bao giờ bịa. Dùng giọng "Tôi chọn Anh/Chị": tự tin, không van xin; trích một chi tiết cụ thể của tin. Với các trường thường gặp trên form Việt Nam, xem `ung-tuyen.md`.

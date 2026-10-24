@@ -79,8 +79,6 @@ Top 5 CV-bewerkingen + Top 5 LinkedIn-bewerkingen om de match te maximaliseren.
 
 De kolom **Reflectie** geeft weer wat er is geleerd of wat er anders zou worden gedaan. Dit duidt op anciënniteit: junioren beschrijven wat er is gebeurd, senioren leren ervan.
 
-**Verhalenbank:** Als `interview-prep/story-bank.md` bestaat, controleer dan of deze verhalen er al zijn. Voeg anders het nieuws toe. In de loop van de tijd bouwt dit een herbruikbare bank van 5-10 meesterverhalen op die aanpasbaar zijn aan elke interviewvraag.
-
 **Geselecteerd en gepositioneerd volgens het archetype:**
 - FDE -> leveringssnelheid en klantnabijheid benadrukken
 - SA -> architectonische beslissingen benadrukken

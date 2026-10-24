@@ -1,6 +1,6 @@
 # Mode: latex-tex — Tailor a user-owned LaTeX CV in place
 
-Opt-in mode for candidates who already maintain a hand-tuned `.tex` CV. **Does not change the global source of truth** — `cv.md` remains the default for evaluations, apply mode, and auto-pipeline. Invoke explicitly via `/career-ops latex-tex`.
+Opt-in mode for candidates who already maintain a hand-tuned `.tex` CV. **Does not change the global source of truth** — `cv.md` remains the default for evaluations and auto-pipeline. Invoke explicitly via `/career-ops latex-tex`.
 
 ## When to use
 

@@ -44,43 +44,7 @@ Kaydedilen rapora G Blok'u ekleyin. Rapor başlığına **URL:** {url} ve **Meş
 - `"latex"` ise, tam süreci `modes/latex.md` üzerinden yürütün
 - Değilse (varsayılan), tam süreci `modes/pdf.md` üzerinden yürütün
 
-## Adım 4 — Başvuru Yanıtları Taslağı (yalnızca puan >= 4.5 ise)
-
-Eğer final puanı >= 4.5 ise, başvuru formu için yanıt taslakları oluşturun:
-
-1. **Form sorularını çıkarın**: Playwright kullanarak forma gidin ve anlık görüntü alın. Çıkarılamazlarsa, genel soruları kullanın.
-2. **Yanıtları oluşturun**, ses tonunu (tone) takip ederek (aşağıya bakın).
-3. **Rapora kaydedin**, `## H) Taslak Başvuru Yanıtları` bölümü olarak.
-
-### Genel Sorular (formdan çıkarılamazsa kullanın)
-
-- Bu rolle neden ilgileniyorsunuz?
-- Neden [Şirket] bünyesinde çalışmak istiyorsunuz?
-- İlgili bir proje veya başarıdan bahsedin
-- Sizi bu pozisyon için iyi bir aday yapan nedir?
-- Bu rolü nasıl duydunuz?
-
-### Form Yanıtları İçin Ses Tonu
-
-**Konum: "Sizi ben seçiyorum."** Adayın seçenekleri var ve bu şirketi belirli nedenlerle seçiyor.
-
-**Ses tonu kuralları:**
-- **Kibirli olmadan kendinden emin**: "Geçen yılı üretim (production) yapay zeka ajan sistemleri inşa ederek geçirdim — rolünüz bu deneyimi uygulamak istediğim sonraki yer"
-- **Kibirli olmadan seçici**: "İlk günden itibaren anlamlı katkı sağlayabileceğim bir takım bulma konusunda bilinçli davrandım"
-- **Spesifik ve somut**: Daima JD'den veya şirketten GERÇEK bir şeye ve adayın deneyiminden GERÇEK bir şeye atıfta bulunun
-- **Laf salatası yapmadan, doğrudan**: Her yanıt için 2-4 cümle. "X konusunda tutkuluyum..." veya "Fırsat bulmayı çok isterim..." gibi ifadeler YOK
-- **Kanca ifadedir, kanıt değil**: "X konusunda harikayım" demek yerine "Y'yi yapan X'i inşa ettim" deyin
-
-**Soru başına çerçeve:**
-- **Neden bu rol?** → "Sizin [belirli bir şeyiniz] doğrudan [benim inşa ettiğim belirli bir şeye] karşılık geliyor."
-- **Neden bu şirket?** → Şirketle ilgili spesifik bir şeyden bahsedin. "[Ürünü] [süre/amaç] için kullanıyorum."
-- **İlgili deneyim?** → Nicel bir kanıt noktası. "[Metrik] sağlayan [X]'i inşa ettim." (Asla doğrulanmamış başarılar veya şirket satışı uydurmayın).
-- **Neden iyi uyum?** → "[A] ve [B]'nin kesişim noktasındayım, ki bu rol tam da burada yer alıyor."
-- **Nasıl duydunuz?** → Dürüstçe: "[Portal/tarama] aracılığıyla buldum, kriterlerime göre değerlendirdim ve en yüksek puanı aldı."
-
-**Dil**: JD hangi dilde olursa olsun, daima `language.output` dilinde (ayarlanmamışsa EN). `/tech-translate` uygulayın.
-
-## Adım 5 — Takipçiyi Güncelle
+## Adım 4 — Takipçiyi Güncelle
 
 Takipçiyi güncellemek için doğrudan `data/applications.md` dosyasına yazmayın. Değişiklikleri bir TSV satırı olarak `batch/tracker-additions/` içine ekleyin ve `node merge-tracker.mjs` komutunu kullanarak takipçiyi güncelleyin.
 

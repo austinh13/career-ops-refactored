@@ -87,17 +87,6 @@ jds/*
 *学位*
 *成绩单*
 
-# Interview prep (accumulated STAR+R stories — user data)
-interview-prep/*
-!/interview-prep/
-!interview-prep/.gitkeep
-# Session transcripts hold real interviewer names/companies — ignore content,
-# ship only the system-owned scaffold (README + .gitkeep). #1242
-!interview-prep/sessions/
-interview-prep/sessions/*
-!interview-prep/sessions/.gitkeep
-!interview-prep/sessions/README.md
-
 # Writing samples (user's personal files — never committed)
 writing-samples/*
 !writing-samples/README.md
@@ -105,29 +94,15 @@ writing-samples/*
 # User config and customization (never auto-updated)
 config/profile.yml
 config/cv-facts.json
-config/benchmarks.yml
-# Fork-local path declarations — this checkout's own files, read by
-# update-system.mjs. Gitignored on purpose: it describes THIS clone, not the
-# project, and must survive the sync that overwrites update-system.mjs (#2421).
-config/local-paths.txt
 portals.yml
 modes/_profile.md
 modes/_custom.md
 modes/_brief.md
 voice-dna.md
-.update-dismissed
-.update-lock
-.manifesto-noted
-
-# Plugin layer — opt-in toggles + user-installed plugins + integrity lock (never auto-updated)
-config/plugins.yml
-plugins.local/
-plugins.lock
 
 # Secrets (never commit — use .env.example as template)
 .env
-# Universal safety net — protects ALL checkouts/branches, incl. untracked subprojects
-# (e.g. web/ before it graduates to main). Never commit local env files or TS build caches.
+# Universal safety net — never commit local env files or TS build caches.
 **/.env.local
 **/.env*.local
 **/*.tsbuildinfo
@@ -228,13 +203,9 @@ opencode.json
 # personal server credentials (e.g. a plugin's API token) once a user adds
 # an MCP server, same risk class as .env.
 .mcp.json
-# Hermes Agent personal project rules. docs/HERMES.md offers it as a way to
-# supply rules that override AGENTS.md without sharing them with the repository.
+# Hermes Agent personal project rules
 .hermes.md
-career-dashboard
-career-dashboard.exe
 package-lock.json
-!web/package-lock.json
 
 # Playwright MCP server run artifacts (ephemeral, machine-local)
 .playwright-mcp/
@@ -243,9 +214,6 @@ playwright-report/
 
 # Planning (local scratchpad)
 plan/
-
-# Web — runtime cache/history the dashboard writes locally; nothing here is tracked.
-.career-ops-web/
 
 # Upgrade-test fixtures are fictional system-layer data, never user data
 # (see DATA_CONTRACT.md). Re-include them past the unanchored user-layer
@@ -262,7 +230,6 @@ documents/*
 # Intake fingerprints — the recorded source filenames may themselves carry
 # PII (e.g. cv/jane-doe-master-cv.pdf). #1723
 data/intake-state.json
-data/agent-inbox.md
 
 # Older installs keep unanchored scaffold negations because reconcileGitignore()
 # only appends rules. Re-ignore matching user-layer folders under data/ after
@@ -270,17 +237,9 @@ data/agent-inbox.md
 data/jds/
 data/output/
 data/documents/
-data/interview-prep/
 
 # Repo-local LaTeX engine placed by install-latex-engine.mjs (.part is its staging copy)
 /tectonic
 /tectonic.exe
 /tectonic.part
 /tectonic.part.exe
-
-# Web UI local runtime and environment
-.career-ops.env
-**/.career-ops.env
-.next/
-web/.next/
-web/out/

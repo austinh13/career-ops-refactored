@@ -364,8 +364,7 @@ try {
 // ── #2392 gap 2: Notes overwritten on a score upgrade ───────────────────────
 // The update path rebuilt Notes as `Re-eval {date} ({old}→{new}). {new notes}`,
 // throwing the existing cell away. The assertions below are on consequences,
-// not text: followup-cadence.mjs must still read the notes-sourced apply date,
-// and merge-tracker's own sibling-req guard must still find the req number.
+// not text: merge-tracker's own sibling-req guard must still find the req number.
 console.log('\nmerge-tracker.mjs — Notes preserved across a score upgrade (#2392)');
 try {
   const APPLIED_ROW =
@@ -388,19 +387,7 @@ try {
     fail(`score upgrade destroyed the existing Notes: ${upgradedRow}`);
   }
 
-  // Consequence 1: the follow-up clock. followup-cadence prefers the
-  // "Applied YYYY-MM-DD" marker in Notes over the Date column, so losing it
-  // silently re-dates the application to the evaluation date.
-  const { analyzeFromContent } = await import(pathToFileURL(join(ROOT, 'followup-cadence.mjs')).href);
-  const cadence = analyzeFromContent(upgraded.tracker, '');
-  const entry = (cadence.entries || []).find(e => e.num === 1);
-  if (entry && entry.appliedDate === '2026-01-15' && entry.appDateSource === 'notes') {
-    pass('followup-cadence still measures from the notes apply date after a merge upgrade');
-  } else {
-    fail(`follow-up clock reset by the merge: ${JSON.stringify(entry && { appliedDate: entry.appliedDate, appDateSource: entry.appDateSource })}`);
-  }
-
-  // Consequence 2: merge-tracker's own #1524 sibling-req guard reads the req
+  // Consequence: merge-tracker's own #1524 sibling-req guard reads the req
   // number back out of Notes. With the req number erased, a genuinely distinct
   // posting with a similar title folds into the row instead of being added.
   // "Senior Staff Data Platform Engineer" fuzzy-matches the row's title, so

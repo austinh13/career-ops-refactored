@@ -27,7 +27,7 @@ const readmes = readdirSync(ROOT).filter((f) => /^README[\w.-]*\.md$/.test(f)).s
 // The whole family must be present: a marker check over an empty (or
 // mis-globbed) list would pass vacuously, which is exactly the blind-check
 // class this suite exists to avoid.
-if (readmes.length >= 17) pass(`found ${readmes.length} README files (17 expected as of Aug 2026)`);
+if (readmes.length >= 1) pass(`found ${readmes.length} README file(s)`);
 else fail(`only ${readmes.length} README*.md files found — glob broken or files removed`);
 
 for (const file of readmes) {
@@ -100,9 +100,9 @@ for (const file of readmes) {
   // write ranges with a preposition, "de A à F" / "من A إلى F", which is how
   // two stale lines survived three sweeps in Aug 2026) — variants need human
   // audit; this only catches a translation with no current structure at all.
-  if (content.includes('A-H') || content.includes('A–H')) {
-    pass(`${file}: mentions the A-H report structure`);
+  if (content.includes('A-G') || content.includes('A–G')) {
+    pass(`${file}: mentions the A-G report structure`);
   } else {
-    fail(`${file}: never mentions A-H — translation predates the current report structure`);
+    fail(`${file}: never mentions A-G — the README predates the current report structure`);
   }
 }

@@ -49,9 +49,7 @@ language:
 |------|----------|------------|
 | `_shared.md` | `modes/_shared.md` (EN) | Общий контекст, архетипы, глобальные правила, специфика рынка РФ |
 | `oferta.md` | `modes/oferta.md` (ES) | Полная оценка вакансии (блоки A-F) |
-| `apply.md` | `modes/apply.md` (ES) | Ассистент заполнения форм откликов |
 | `pipeline.md` | `modes/pipeline.md` (ES) | Очередь URL-ов / Second Brain для собранных вакансий |
-| `interview-prep.md` | `modes/interview-prep.md` (EN) | Подготовка к собеседованию |
 
 Остальные режимы (`scan`, `batch`, `pdf`, `tracker`, `auto-pipeline`, `deep`, `contacto`, `ofertas`, `project`, `training`) остаются на EN/ES. Их содержимое — в основном tooling, пути и команды — не зависит от языка.
 

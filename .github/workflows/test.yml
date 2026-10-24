@@ -59,19 +59,10 @@ jobs:
         uses: actions/setup-node@v7
         with:
           node-version: '24'
-      - uses: actions/setup-go@v7
-        with:
-          go-version: '1.27'
-          # The module lives in dashboard/, so without this setup-go looks for
-          # go.sum at the root, warns, and caches nothing.
-          cache-dependency-path: dashboard/go.sum
       # Skip the postinstall (npx playwright install chromium); the tests
       # never launch a browser, so the ~170 MB download is pure CI overhead.
       - run: npm install --ignore-scripts
       - run: node test-all.mjs --quick
-      - name: Go dashboard tests
-        run: go test ./...
-        working-directory: dashboard
 
   cv-visual:
     runs-on: ubuntu-latest
@@ -98,31 +89,3 @@ jobs:
             test-results/cv-visual-artifacts/
             test-results/cv-visual-results/
           if-no-files-found: ignore
-  upgrade-gate:
-    name: Upgrade regression gate
-    runs-on: ubuntu-latest
-    # About 2 minutes. Limited for the test job's reason.
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          fetch-depth: 0            # harness needs release tags
-          persist-credentials: false # the harness only ever touches a local mirror
-      - uses: actions/setup-node@v7
-        with:
-          node-version: '24'
-      - uses: actions/setup-go@v7
-        with:
-          go-version: '1.27'   # old updaters rebuild the dashboard during apply
-          cache-dependency-path: dashboard/go.sum
-      - run: npm install --ignore-scripts
-      - name: Upgrade PR gate (newest old release -> this commit)
-        run: node upgrade-tests.mjs --pr-gate
-      - name: Canary (harness must be able to fail)
-        run: node upgrade-tests.mjs --canary
-      - name: Local-paths declaration survives a real apply (#2421)
-        run: node upgrade-tests.mjs --local-paths
-      - name: User-layer manifest entry is refused, not fatal (#3782)
-        run: node upgrade-tests.mjs --user-layer-refusal
-      - name: Failed npm install is reported, rollback reinstalls
-        run: node upgrade-tests.mjs --failed-install

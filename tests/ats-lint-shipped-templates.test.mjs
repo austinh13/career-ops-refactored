@@ -65,7 +65,6 @@ test('the sweep actually has templates to sweep', () => {
   assert.ok(shipped.length >= 8, `expected the shipped template set, found ${shipped.length}`);
   const names = shipped.map((t) => relative(ROOT, t.path));
   assert.ok(names.includes(join('templates', 'cv-template.html')), 'the default CV template must be in the sweep');
-  assert.ok(names.includes(join('templates', 'cover-letter-template.html')), 'the cover-letter template must be in the sweep');
 
   // The partial set has its own floor. Without it a rename of sections/ leaves
   // the templates asserted and the fragments silently unswept, which is the

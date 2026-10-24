@@ -1,11 +1,10 @@
 # Company Blacklist
 
-Your own do-not-apply list (user layer, opt-in). Copy this file to `data/blacklist.md` and edit it — the system never creates or populates it for you, and no update ever touches it.
+Your own do-not-apply list (user layer, opt-in). Copy this file to `data/blacklist.md` and edit it — the system never creates or populates it for you, and no script ever overwrites it.
 
 When `data/blacklist.md` exists:
 
-- `scan.mjs` skips postings from listed companies (matched case- and punctuation-insensitively) and reports the count in the run summary — `--include-blacklisted` bypasses the filter for auditing.
-- The `auto-pipeline`, `oferta`, and `apply` modes stop on a match, quote your recorded reason, and ask for an explicit override before proceeding. Your call always wins.
+- The `auto-pipeline` and `oferta` modes stop on a match, quote your recorded reason, and ask for an explicit override before proceeding. Your call always wins.
 - A blacklist entry never changes any score anywhere — it is a gate, not a signal.
 
 `Scope` is either `company` (the default: match the feed-provided company label,

@@ -23,7 +23,7 @@ Requires a tailored CV produced by `modes/pdf.md`. Normally that CV was just bui
 
 ## Inputs
 
-1. **Role** — a report number or company slug. If omitted, use the most recent evaluated role (same argument pattern as `cover`).
+1. **Role** — a report number or company slug. If omitted, use the most recent evaluated role (same argument pattern as `pdf`).
 2. **Report** at `reports/{num}-{company}-{date}.md` — read for the `**URL:**` header, archetype, and identified gaps.
 3. **JD** at `jds/{slug}.md`, or fetched from the report's `**URL:**`.
 4. **Tailored bullets** — resolve the artifact for *this* role, in order. Never parse the `.pdf`.
@@ -113,7 +113,7 @@ Plus:
 
 Present to the user **before any PDF regeneration**: the identity guess, the tier and its sources, the full table, and the overall verdict. The user makes the judgment call on which rewrites to take.
 
-Persist only **after** that decision is known. The audit judged the CV as it stood at Step 19; if the user then accepts rewrites, `pdf` rebuilds from Step 17 and the rendered PDF is no longer the artifact this table describes. Recording the decision keeps the section honest about which one it read — `interview-prep` consumes it later as "bullets the reviewer would have cut," and criticism the user already acted on would otherwise resurface as though it still stood.
+Persist only **after** that decision is known. The audit judged the CV as it stood at Step 19; if the user then accepts rewrites, `pdf` rebuilds from Step 17 and the rendered PDF is no longer the artifact this table describes. Recording the decision keeps the section honest about which one it read — criticism the user already acted on would otherwise resurface as though it still stood.
 
 Then write this section into `reports/{num}-{company}-{date}.md`:
 
@@ -131,9 +131,9 @@ Then write this section into `reports/{num}-{company}-{date}.md`:
 |---|---|---|---|---|
 ```
 
-**Exactly one `## HM Audit` section per report.** If one already exists, **replace it wholesale** rather than appending a second — a re-run after retailoring supersedes the previous audit, and `interview-prep` reads this as the single current audit. The `**Audited:**` and `**Rewrites applied after this audit:**` lines carry the artifact, the date, and what happened to the verdict afterwards, so which CV was judged — and whether the shipped one still matches it — stays unambiguous.
+**Exactly one `## HM Audit` section per report.** If one already exists, **replace it wholesale** rather than appending a second — a re-run after retailoring supersedes the previous audit, so the report always holds the single current audit. The `**Audited:**` and `**Rewrites applied after this audit:**` lines carry the artifact, the date, and what happened to the verdict afterwards, so which CV was judged — and whether the shipped one still matches it — stays unambiguous.
 
-Placement follows the convention of the cover letter draft appended by `modes/oferta.md`. If the role has no report, present the audit inline and say plainly that it was not persisted because there is no report to attach it to — never create a stray file.
+Append it to the end of the report. If the role has no report, present the audit inline and say plainly that it was not persisted because there is no report to attach it to — never create a stray file.
 
 ## Guardrails
 

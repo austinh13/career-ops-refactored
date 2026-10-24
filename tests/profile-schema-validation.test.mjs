@@ -80,12 +80,12 @@ test('a section the example ships commented out is known, not "no effect"', () =
   // style (#1837) and page_format (#4405) are documented only as commented-out
   // blocks, and theme-style.mjs / lib/page-format.mjs read them. Deriving keys
   // from the parsed example alone told a user who set them that the setting had
-  // no effect. scan is the same case: the example shows `# scan:`.
+  // no effect. pipeline is the same case: the example shows `# pipeline:`.
   const profile = [
     'candidate:', '  full_name: X',
     'page_format: a4',
     'style:', '  accent_color: "#2563eb"',
-    'scan:', '  extractor: cli',
+    'pipeline:', '  triage_threshold: 3.5',
     '',
   ].join('\n');
   assert.deepEqual(validateProfile(profile, EXAMPLE).findings, []);

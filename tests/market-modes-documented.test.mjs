@@ -55,14 +55,14 @@ test('and the table names no set that does not ship', () => {
   assert.deepEqual(ghosts, [], `the market table names non-existent set(s): ${ghosts.join(', ')}`);
 });
 
-test('every evaluation and apply mode the table names exists on disk', () => {
+test('every evaluation mode the table names exists on disk', () => {
   // The mode NAMES are what a user types and what the agent looks for. A row
   // with the right directory and a wrong filename is still a dead route.
-  const rows = [...AGENTS.matchAll(/\|\s*`modes\/([a-zA-Z-]+)\/`\s*\|\s*`([a-z-]+)`\s*\/\s*`([a-z-]+)`\s*\|/g)];
+  const rows = [...AGENTS.matchAll(/\|\s*`modes\/([a-zA-Z-]+)\/`\s*\|\s*`([a-z-]+)`\s*\|/g)];
   assert.ok(rows.length >= 18, `only ${rows.length} market rows parsed — the table format changed`);
   const missing = [];
-  for (const [, dir, evalMode, applyMode] of rows) {
-    for (const mode of [evalMode, applyMode]) {
+  for (const [, dir, evalMode] of rows) {
+    for (const mode of [evalMode]) {
       const path = join('modes', dir, `${mode}.md`);
       if (!existsSync(join(ROOT, path))) missing.push(path);
     }

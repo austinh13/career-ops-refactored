@@ -27,11 +27,27 @@
 import { readFileSync, existsSync, readdirSync } from 'fs';
 import { dirname, join, relative, sep } from 'path';
 import { fileURLToPath } from 'url';
-import { USER_PATHS } from './update-system.mjs';
 import { isMainModule } from './lib/is-main-module.mjs';
 import { listTree } from './lib/walk-tree.mjs';
 
 const ROOT = dirname(fileURLToPath(import.meta.url));
+
+// User-layer paths (see DATA_CONTRACT.md): files and directories (trailing
+// slash) the user owns. Mode text is never required to carry the marker there.
+const USER_PATHS = [
+  'cv.md',
+  'config/profile.yml',
+  'modes/_profile.md',
+  'modes/_custom.md',
+  'modes/_brief.md',
+  'voice-dna.md',
+  'article-digest.md',
+  'documents/',
+  'data/',
+  'reports/',
+  'output/',
+  'jds/',
+];
 
 const MARKER = 'Untrusted External Content';
 const CANONICAL_HEADING = `## ${MARKER} (CRITICAL)`;
@@ -86,7 +102,7 @@ const ALWAYS_REQUIRED = [
 const LOCALIZED_MIRROR = /^modes\/[a-z]{2}(-[A-Z]{2})?\//;
 
 /**
- * USER-layer files, derived from update-system.mjs's USER_PATHS rather than
+ * USER-layer files, derived from USER_PATHS rather than
  * re-listed here — a second hardcoded copy is how a fourth user file ends up
  * policed by tooling that must not have an opinion about it.
  *

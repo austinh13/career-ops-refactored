@@ -91,7 +91,7 @@ if (!existsSync(join(ROOT, 'web', 'src'))) {
 // evaluation mode is not named oferta.md (tr/is-ilani.md, ja/kyujin.md,
 // ar/fursah.md) is invisible to the oferta.md walk in test-all.mjs. A file
 // still at the pre-Block-G shape has no Block G for the lead block to follow,
-// so it drops out by carrying no `## H)` and no `## Risk Summary`, with no
+// so it drops out by carrying no `## G)` and no `## Risk Summary`, with no
 // allowlist to maintain.
 {
   const modeFiles = ['modes/oferta.md'];
@@ -102,7 +102,7 @@ if (!existsSync(join(ROOT, 'web', 'src'))) {
     }
   }
   const skeleton = modeFiles.map(f => [f, readFile(f)])
-    .filter(([, t]) => t.includes('## H)') && t.includes('## Risk Summary'));
+    .filter(([, t]) => t.includes('## G)') && t.includes('## Risk Summary'));
   const names = skeleton.map(([f]) => f);
   if (names.length < 8 || !names.includes('modes/oferta.md') || !names.includes('modes/tr/is-ilani.md')) {
     fail(`verdict-lead walk found ${names.length} full-skeleton modes (${names.join(', ')}) — expected ≥8 incl. modes/oferta.md and modes/tr/is-ilani.md; the check would be blind`);

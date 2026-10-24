@@ -295,28 +295,9 @@ function coverSandbox() {
   return dir;
 }
 
-test('generate-cover-letter: the sheet is the renderer\'s to choose', () => {
-  const dir = coverSandbox();
-  const run = (...extra) => {
-    const res = spawnSync(
-      NODE,
-      [join(dir, 'generate-cover-letter.mjs'), '--payload', join(dir, 'payload.json'), ...extra],
-      { cwd: dir, encoding: 'utf-8' },
-    );
-    assert.equal(res.status, 0, res.stdout + res.stderr);
-    return JSON.parse(readFileSync(join(dir, 'render-opts.json'), 'utf-8'));
-  };
-  // Flagless, the CLI states no size, so the letter resolves the same profile
-  // its CV did and lands on the same paper. A fallback of its own here is what
-  // printed the two on different sheets.
-  assert.equal(run().format, null, 'the cover letter chose a paper size of its own');
-  // A flag travels unresolved, for the renderer to rank against the profile.
-  assert.equal(run('--format', 'a4').format, 'a4');
-});
-
 test('no renderer keeps a page-size fallback of its own', () => {
   const offenders = [];
-  for (const file of ['generate-pdf.mjs', 'generate-cover-letter.mjs', 'build-cv-html.mjs']) {
+  for (const file of ['generate-pdf.mjs', 'build-cv-html.mjs']) {
     const src = readFileSync(join(ROOT, file), 'utf-8');
     for (const [i, line] of src.split('\n').entries()) {
       if (line.trimStart().startsWith('*') || line.trimStart().startsWith('//')) continue;

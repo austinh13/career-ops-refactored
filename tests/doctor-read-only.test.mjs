@@ -64,7 +64,7 @@ test('--json reports missing prerequisites without copying available templates',
   const before = snapshot(dir);
   const result = state(dir);
   assert.equal(result.onboardingNeeded, true);
-  assert.deepEqual(result.missing, ['cv.md', 'config/profile.yml', 'modes/_profile.md', 'portals.yml']);
+  assert.deepEqual(result.missing, ['cv.md', 'config/profile.yml', 'modes/_profile.md']);
   assert.deepEqual(result.autoCopied, []);
   assert.deepEqual(snapshot(dir), before);
 });
@@ -72,7 +72,7 @@ test('--json reports missing prerequisites without copying available templates',
 test('--json leaves an empty data root empty with shipped templates available', (t) => {
   const dir = fixture(t);
   const result = state(dir);
-  assert.equal(result.missing.length, 4);
+  assert.equal(result.missing.length, 3);
   assert.deepEqual(result.autoCopied, []);
   assert.deepEqual(readdirSync(dir), []);
 });
@@ -81,7 +81,7 @@ test('explicit initialization uses local templates and preserves existing user f
   const dir = fixture(t);
   mkdirSync(join(dir, 'modes'));
   mkdirSync(join(dir, 'config'));
-  for (const path of ['cv.md', 'config/profile.yml', 'portals.yml']) {
+  for (const path of ['cv.md', 'config/profile.yml']) {
     writeFileSync(join(dir, path), 'Existing user input\n');
   }
   writeFileSync(join(dir, 'modes/_profile.md'), 'Personalized targeting\n');
@@ -106,7 +106,7 @@ test('explicit initialization supports a separate empty data root and retains pe
   const dir = fixture(t);
   const result = state(dir, ['--json', '--init-templates']);
   assert.deepEqual(result.autoCopied, TARGETS);
-  assert.deepEqual(result.missing, ['cv.md', 'config/profile.yml', 'portals.yml']);
+  assert.deepEqual(result.missing, ['cv.md', 'config/profile.yml']);
   for (const target of TARGETS) {
     assert.deepEqual(readFileSync(join(dir, target)), readFileSync(join(ROOT, target.replace('.md', '.template.md'))));
   }

@@ -79,35 +79,6 @@ const cleanup = (f) => {
   }
 };
 
-test('set-status finds the tracker under the configured data root', () => {
-  const f = fixture();
-  try {
-    const r = run('set-status.mjs', ['1', 'Interview', '--note', 'data-root check'], f);
-    assert.doesNotMatch(r.all, /No tracker found/i,
-      `it looked in the checkout, not the data root:\n${r.all.slice(0, 400)}`);
-  } finally { cleanup(f); }
-});
-
-test('set-status writes the new status into the data-root tracker', () => {
-  const f = fixture();
-  try {
-    run('set-status.mjs', ['1', 'Interview', '--note', 'data-root check'], f);
-    const tracker = readFileSync(join(f.dataRoot, 'data', 'applications.md'), 'utf-8');
-    assert.match(tracker, /\|\s*Interview\s*\|/,
-      `the status never reached the data-root tracker:\n${tracker}`);
-    assert.doesNotMatch(tracker, /\|\s*Applied\s*\|/, 'the old status is still there');
-  } finally { cleanup(f); }
-});
-
-test('set-status does not create a tracker in the checkout or the cwd', () => {
-  const f = fixture();
-  try {
-    run('set-status.mjs', ['1', 'Interview'], f);
-    assert.ok(!existsSync(join(f.decoyCwd, 'applications.md')), 'wrote a tracker into the cwd');
-    assert.ok(!existsSync(join(f.decoyCwd, 'data', 'applications.md')), 'wrote data/ into the cwd');
-  } finally { cleanup(f); }
-});
-
 test('generate-pdf does not treat the data root as outside its workspace', () => {
   const f = fixture();
   try {
@@ -228,24 +199,6 @@ function runFromCodeRoot(f, script, args) {
 }
 
 const markerCleanup = (f) => rmSync(f.dir, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
-
-test('set-status honours a .career-ops-data marker, not just CAREER_OPS_ROOT', (t) => {
-  const f = markerFixture('set-status.mjs');
-  // set-status reaches js-yaml through tracker-utils.mjs, so with no linked tree
-  // the child dies at module load and every assertion below passes vacuously.
-  if (f.depsReason) { markerCleanup(f); return t.skip(f.depsReason); }
-  try {
-    const r = runFromCodeRoot(f, 'set-status.mjs', ['1', 'Interview', '--note', 'marker check']);
-    // Positive first. Every assertion below is an ABSENCE, and a child that
-    // died at module load satisfies all of them while proving nothing -- the
-    // same vacuity CodeRabbit caught in the generate-pdf case on #4486.
-    assert.equal(r.status, 0, describeSpawn(r, `set-status exited ${r.status}:\n${r.all.slice(0, 600)}`));
-    assert.doesNotMatch(r.all, /No tracker found/i,
-      `the marker was ignored and it looked beside the script:\n${r.all.slice(0, 400)}`);
-    const tracker = readFileSync(join(f.dataRoot, 'data', 'applications.md'), 'utf-8');
-    assert.match(tracker, /\|\s*Interview\s*\|/, `the status never reached the marked tracker:\n${tracker}`);
-  } finally { markerCleanup(f); }
-});
 
 test('generate-pdf honours a .career-ops-data marker for its workspace boundary', (t) => {
   const f = markerFixture('generate-pdf.mjs');

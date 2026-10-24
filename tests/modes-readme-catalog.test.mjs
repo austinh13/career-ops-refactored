@@ -27,7 +27,7 @@ const rows = [...catalog.matchAll(/^\| `([a-z-]+\.md)` \| ([^|]+) \|/gm)].map((m
 const routed = new Set([...SKILL.matchAll(/^\| `([a-z/-]+)` \| `[^`]+` \|$/gm)].map((m) => m[1]));
 
 test('every top-level mode file has a catalog row', () => {
-  assert.ok(rows.length >= 20, `only ${rows.length} catalog rows parsed — the table format changed`);
+  assert.ok(rows.length >= 10, `only ${rows.length} catalog rows parsed — the table format changed`);
   const files = readdirSync(MODES).filter((f) => f.endsWith('.md') && !f.startsWith('_') && f !== 'README.md');
   const listed = new Set(rows.map(([file]) => file));
   const missing = files.filter((f) => !listed.has(f));
@@ -40,7 +40,7 @@ test('every catalog row names a file that exists', () => {
 });
 
 test('every backticked mode name in the catalog is one the router accepts', () => {
-  assert.ok(routed.size >= 20, `only ${routed.size} router inputs parsed — the routing table format changed`);
+  assert.ok(routed.size >= 10, `only ${routed.size} router inputs parsed — the routing table format changed`);
   const rejected = rows.flatMap(([, cell]) => [...cell.matchAll(/`([^`]+)`/g)].map((m) => m[1]))
     .filter((name) => !routed.has(name));
   assert.deepEqual(rejected, [], `the catalog names mode(s) the router does not route: ${rejected.join(', ')}`);

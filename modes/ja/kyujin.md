@@ -96,8 +96,6 @@ JD requirements に mapping した 6-10 STAR+R stories（STAR + **Reflection**�
 
 **Reflection** column は、何を学んだか、または次に何を変えるかを捉える。これは seniority の signal。Junior candidates は起きたことを説明する。Senior candidates は lessons を抽出する。
 
-**Story Bank:** `interview-prep/story-bank.md` が存在する場合、これらの stories がすでにあるか確認する。なければ新しいものを append する。時間とともに、どの interview question にも適応できる 5-10 master stories の reusable bank を作る。
-
 **Selected and framed according to the archetype:**
 - FDE → delivery speed と client-facing を強調
 - SA → architectural decisions を強調
@@ -167,63 +165,6 @@ Job posting を分析し、real, active opening かどうかを示す signals �
 
 ---
 
-## Cover Letter Draft (auto-generated after Block G)
-
-Report を保存し tracker に記録した後、report file に `## Cover Letter Draft` として cover letter draft を append する。これは starting point であり final letter ではない。ユーザーは `/career-ops cover {slug}` で完成させる。
-
-**How to generate the draft:**
-
-1. `cv.md` を読む。JD の top requirements に最も relevant な achievement bullets を 4 つ選ぶ（exact wording、real metrics only）
-2. `config/profile.yml` を読む。candidate name、current role、years of experience を抽出する
-3. Role title と JD mission language に基づく 2-sentence opening を書く
-4. `cv.md` summary から 1-paragraph profile intro を書き、JD domain に合わせる
-5. "Problems / Why this company / Approach" section は placeholder にする。ここは user input が必要
-6. Gaps（domain mismatch、language requirement、start date urgency）を detect and flag し、ユーザーがすぐ確認できるようにする
-
-**Draft format to append to the report:**
-
-```markdown
-## Cover Letter Draft
-
-> Draft generated at evaluation time. Complete via `/career-ops cover {slug}` to fill in angles, confirm research, and generate the PDF.
-> Gaps flagged below -- address them during the cover flow.
-
----
-
-**Opening** *(placeholder -- refine with your "why this role" angle)*
-{2-sentence opening based on JD role title and mission language}
-
-**Profile introduction**
-{1 paragraph from cv.md summary, adapted to JD domain and required competencies}
-
-**Key achievements** *(selected from cv.md -- exact wording preserved)*
-- **{lead from cv.md},** {impact sentence with metric}.
-- **{lead from cv.md},** {impact sentence with metric}.
-- **{lead from cv.md},** {impact sentence with metric}.
-- **{lead from cv.md},** {impact sentence with metric}.
-
-**Problems I will solve** *(placeholder -- requires company research + your input)*
-> To be completed: what challenges does {company} face that you'd address? How would you approach them?
-
-**Closing**
-I am happy to discuss further at your convenience.
-
----
-
-**Gaps flagged:**
-{List any detected gaps -- domain mismatch, language requirement, start date urgency, title mismatch. If none, write "None detected."}
-
-**JD keywords to mirror** *(extracted for ATS + human read)*
-{8-10 exact phrases from the JD}
-
----
-*Run `/career-ops cover {slug}` to complete angles, confirm company research, and generate the PDF.*
-```
-
-`_writing.md` の Professional Writing section にある language rules を draft content にすべて適用する。No em dashes、no buzzwords、active voice、concrete claims only。
-
----
-
 ## 判定 (lead)
 
 ブロック G の直後、`## Risk Summary` の前に `## 判定 (lead)` ブロックを書く。読者がレポートを開いた唯一の問い、すなわち「応募すべきか」に答えるブロックである。
@@ -250,7 +191,7 @@ I am happy to discuss further at your convenience.
 
 **集約のみで、新たな judgment は行いません。** 各行は、元のシグナルがすでに出した判定を引用またはリンクします。サマリーが再採点・再重み付け・上書きを行うことは決してありません。ある行が誤って見える場合、修正すべきは元のシグナル側であり、ここではありません。
 
-各行の状態は3種類：`✅ {明確な判定}` / `⚠️ {検出事項}` / `— not evaluated`。**`— not evaluated` は一級の状態です。** シグナルを実行できなかった場合は、行を省略せず明示してください。そうして初めて、すべて ✅ のサマリーを信頼できます。**個別の例外：** 面接レッドフラグ行の未評価は `— no interview sessions yet` と表記します。これは同じ「未評価」概念をこの行に限ってより具体的に言い換えたもので（相互参照チェック自体は実行され、redflags ファイルが無かっただけ）、4つ目の状態ではありません。
+各行の状態は3種類：`✅ {明確な判定}` / `⚠️ {検出事項}` / `— not evaluated`。**`— not evaluated` は一級の状態です。** シグナルを実行できなかった場合は、行を省略せず明示してください。そうして初めて、すべて ✅ のサマリーを信頼できます。
 
 行ラベル、`| Signal | Status |` のヘッダー、状態の語彙はいずれも固定リテラルであり、翻訳しません。Machine Summary の `risk_summary` がこれらに依存します。
 
@@ -259,7 +200,6 @@ I am happy to discuss further at your convenience.
 | Posting legitimacy | ブロック G の評価ティア | `✅ High Confidence`。Proceed with Caution / Suspicious は `⚠️ {tier} — {一文の理由}` |
 | Employment classification | ブロック G 内の雇用形態シグナル | チェックが実行され問題がなければ `✅ clear`。フラグが立った場合は `⚠️ contractor-style language: "{引用した表現}"`。実行できなかった場合は `— not evaluated` |
 | Culture screen | ブロック A のカルチャースクリーン項目 | `✅ pass`、または `⚠️ caution — {根拠}` / `⚠️ fail — {根拠}`。スクリーンを実施していない場合は `— not evaluated` |
-| Interview red flags | `interview-prep/{company-slug}-redflags.md`（`interview-redflag` モード） | **コピーではなく相互参照：** ファイルが存在する場合は現在の警告レベルと相対リンクを記載 — `[{level}](../interview-prep/{company-slug}-redflags.md)`（`reports/` からの相対）。無ければ `— no interview sessions yet` |
 | AI claims vs. infrastructure | ブロック G の AI／インフラ整合性チェック（存在する場合） | 本レポートにそのチェックが含まれる場合は判定をミラーする（`✅ consistent` / `⚠️ {検出事項}`）。無ければ `— not evaluated`。チェックが存在すれば自動的に有効化され、順序依存はありません |
 
 ブロック形式：
@@ -272,7 +212,6 @@ I am happy to discuss further at your convenience.
 | Posting legitimacy | ✅ High Confidence |
 | Employment classification | ⚠️ contractor-style language: "{quoted phrase}" |
 | Culture screen | ⚠️ caution — {evidence} |
-| Interview red flags | — no interview sessions yet |
 | AI claims vs. infrastructure | — not evaluated |
 ```
 
@@ -331,11 +270,6 @@ Full evaluation を `reports/{###}-{company-slug}-{YYYY-MM-DD}.md` に保存す�
 
 ## Risk Summary
 (リスクシグナルごとに1行、順序は固定 — 上記の Risk Summary セクションを参照)
-
-## H) Draft Application Answers
-(only if score >= 4.5 -- draft answers for the application form)
-
----
 
 ## Keywords extracted
 (list of 15-20 keywords from the JD for ATS optimization)

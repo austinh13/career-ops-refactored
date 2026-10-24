@@ -41,7 +41,6 @@ language:
 |-----|---------|---------|
 | `_shared.md` | `modes/_shared.md` | Ngữ cảnh chung, archetype, hệ thống chấm điểm, quy tắc toàn cục, đặc thù thị trường Việt Nam |
 | `tuyen-dung.md` | `modes/oferta.md` | Đánh giá đầy đủ một tin tuyển dụng (Block A-G, Risk Summary, Block H) |
-| `ung-tuyen.md` | `modes/apply.md` | Trợ lý điền form ứng tuyển trực tiếp (bản rút gọn) |
 | `pipeline.md` | `modes/pipeline.md` | Hộp thư URL / Second Brain cho các tin đã thu thập |
 
 Các mode còn lại (`scan`, `batch`, `pdf`, `tracker`, `auto-pipeline`, `deep`, `contacto`, `ofertas`, `project`, `training`, `interview/*`...) dùng bản chuẩn trong `modes/`. Nội dung chủ yếu là công cụ, đường dẫn và lệnh -- cần độc lập với ngôn ngữ. Các mode phỏng vấn (`plan`, `practice`, `debrief`) chưa có bản tiếng Việt.
@@ -50,10 +49,10 @@ Các mode còn lại (`scan`, `batch`, `pdf`, `tracker`, `auto-pipeline`, `deep`
 
 Cố ý không dịch vì script hoặc giao diện web đọc theo tên:
 
-- Tiêu đề cấp 2 của báo cáo (`Machine Summary`, `Risk Summary`, `A) ...` đến `H) ...`, và dấu `(lead)` của khối kết luận) cùng các nhãn header `**Date:**`, `**URL:**`, `**Archetype:**`, `**Score:**`, `**Legitimacy:**`, `**Work Auth:**`, `**PDF:**`. Nhãn quyết định là `**Quyết định:**` và được `web/src/lib/report-header.mjs` đọc như Decision.
+- Tiêu đề cấp 2 của báo cáo (`Machine Summary`, `Risk Summary`, `A) ...` đến `G) ...`, và dấu `(lead)` của khối kết luận) cùng các nhãn header `**Date:**`, `**URL:**`, `**Archetype:**`, `**Score:**`, `**Legitimacy:**`, `**Work Auth:**`, `**PDF:**`. Nhãn quyết định là `**Quyết định:**` và được các script đọc như Decision.
 - Tên cột bảng Block B (`Requirement`, `Importance`, `Match`, `JD signal`, `Evidence / gap`) và bảng `| Signal | Status |` của Risk Summary
 - Khóa YAML và giá trị enum trong Machine Summary
-- Tiêu đề mục `## Pending` / `## Processed` trong `data/pipeline.md` (vì `scan.mjs` và `reconcile-pipeline.mjs` chỉ nhận cách viết tiếng Anh và tiếng Tây Ban Nha)
+- Tiêu đề mục `## Pending` / `## Processed` trong `data/pipeline.md` (vì `reconcile-pipeline.mjs` chỉ nhận cách viết tiếng Anh và tiếng Tây Ban Nha)
 - Giá trị trạng thái trong tracker (`Evaluated`, `Applied`, `Interview`, `Offer`, `Rejected`...)
 - Tên công cụ (`Playwright`, `WebSearch`, `WebFetch`, `Read`, `Write`, `Edit`, `Bash`), đoạn mã, đường dẫn, lệnh
 - Thuật ngữ kỹ thuật phổ biến trong ngành: stack, pipeline, deployment, embedding, proof point, archetype...
@@ -118,4 +117,3 @@ Phần này ghi lại những gì đã được mã hóa, để người sau có
 3. Dịch theo ý, không dịch từng chữ
 4. Giữ nguyên các thành phần cấu trúc (Block A-H, bảng, khối mã, chỉ dẫn công cụ) -- các script và giao diện web đọc chúng theo tên
 5. Kiểm tra bằng tin tuyển dụng Việt Nam thật (ITviec, TopCV, VietnamWorks...) trước khi gửi PR
-6. Chạy `node i18n-drift.mjs --lang vi` để kiểm tra độ phủ cấu trúc so với mode chuẩn

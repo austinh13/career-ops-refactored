@@ -79,8 +79,6 @@ Top 5 mudanças no currículo + Top 5 mudanças no LinkedIn para maximizar o mat
 
 A coluna **Reflection** captura o que foi aprendido ou o que seria feito diferente. Isso sinaliza senioridade — candidatos juniores descrevem o que aconteceu, candidatos seniores extraem lições.
 
-**Story Bank:** Se `interview-prep/story-bank.md` existir, verificar se alguma dessas histórias já está lá. Se não, adicionar as novas. Com o tempo, isso constrói um banco reutilizável de 5-10 histórias-mestre que podem ser adaptadas para qualquer pergunta de entrevista.
-
 **Selecionadas e enquadradas conforme o arquétipo:**
 - FDE → enfatizar velocidade de entrega e proximidade com cliente
 - SA → enfatizar decisões de arquitetura

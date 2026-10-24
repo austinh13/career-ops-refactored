@@ -216,5 +216,5 @@ I danske opslag og forhandlinger optræder visse termer, som ikke findes på EN/
 | Playwright | Tjek om opslag er aktive (browser_navigate + browser_snapshot), udtræk opslag fra SPAs. **KRITISK: ALDRIG 2+ agenter parallelt med Playwright -- de deler den samme browser-instans** |
 | Read | cv.md, article-digest.md, cv-template.html |
 | Write | Midlertidig HTML til PDF, reports .md, TSV-filer til trackeren i `batch/tracker-additions/` (aldrig `applications.md` direkte) |
-| Edit | Rettelser i rapporter og andet genereret indhold. Aldrig tracker-tabellen: nye rækker tilføjes som TSV og flettes med `node merge-tracker.mjs`, ændringer af status og noter går gennem `node set-status.mjs` |
-| Bash | `node generate-pdf.mjs`, `node merge-tracker.mjs`, `node set-status.mjs` |
+| Edit | Rettelser i rapporter og andet genereret indhold. Aldrig tracker-tabellen: nye rækker tilføjes som TSV og flettes med `node merge-tracker.mjs` |
+| Bash | `node generate-pdf.mjs`, `node merge-tracker.mjs` |

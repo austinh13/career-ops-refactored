@@ -130,7 +130,7 @@ Una fila `inferred` **nunca** puede ser `critical` ni `high` y nunca contribuye 
 
 ### Columna Match — frontera de fuente de verdad
 
-`Match` proviene **solo** de archivos primarios. Un `✅ Strong` **no** puede basarse en cifras `derived-unverified` o `user-cannot-confirm` de `interview-prep/story-bank.md`.
+`Match` proviene **solo** de archivos primarios.
 
 ### Contenido no confiable
 
@@ -220,8 +220,6 @@ Top 5 modificaciones del CV + Top 5 modificaciones de LinkedIn para maximizar el
 
 La columna **Reflexión** captura lo aprendido o lo que se haría diferente.
 
-**Story Bank:** Si existe `interview-prep/story-bank.md`, verificar si estas stories ya están ahí. Si no, añadir las nuevas.
-
 **Seleccionadas y enmarcadas según el arquetipo:**
 - FDE → velocidad de entrega y cercanía al cliente
 - SA → decisiones de arquitectura
@@ -289,10 +287,6 @@ Analizar la oferta en busca de señales que indiquen si se trata de una vacante 
 
 **Tabla de señales:** Cada señal observada con hallazgo y peso (Positive / Neutral / Concerning).
 
-### Prior-contact FYI (no afecta al score)
-
-Ejecutar `node company-history.mjs --company <empresa>` pasando el nombre como argumento único entrecomillado. Ramificar según `responsiveness.label`: `silent-on-you` → informar historial de silencio; `mixed` → informar historial mixto; `responded-before` o `no-history` → no decir nada. NO alterar score ni Assessment.
-
 ### Gestión de casos extremos:
 - **Gobierno/academia:** plazos más largos estándar (60-90 días normal).
 - **Evergreen/continua:** si la JD dice "ongoing" o "rolling", anotar como contexto.
@@ -339,24 +333,11 @@ Formato del bloque:
 | Posting legitimacy | ✅ High Confidence |
 | Employment classification | ⚠️ contractor-style language: "{quoted phrase}" |
 | Culture screen | ⚠️ caution — {evidence} |
-| Interview red flags | — no interview sessions yet |
 | AI claims vs. infrastructure | — not evaluated |
 | AI-screening disclosure | — not evaluated |
 ```
 
 Reflejar en `## Machine Summary` como mapa `risk_summary:` (claves y valores enum en `batch/batch-prompt.md`).
-
----
-
-## Cover Letter Draft (auto-generado después del Bloque G)
-
-Después de guardar el report y registrar en el tracker, añadir borrador de carta de presentación bajo `## Cover Letter Draft`. Punto de partida; el usuario completa vía `/career-ops cover {slug}`.
-
-**Cómo generar:** 1) Leer `cv.md` — seleccionar 4 logros relevantes (formulación exacta, métricas reales). 2) Leer `config/profile.yml` — nombre, puesto actual, experiencia. 3) Apertura de 2 frases basada en título y misión de la JD. 4) 1 párrafo de perfil desde cv.md adaptado al dominio. 5) Sección "Problemas / Por qué esta empresa" como placeholder. 6) Detectar y marcar gaps.
-
-## Cover Letter Draft
-
-Formato a anexar: aviso de borrador generado; gaps flagged; `Opening`; `Profile introduction`; `Key achievements` (formulación exacta de cv.md); `Problems I will solve`; `Closing`; `Gaps flagged`; `JD keywords to mirror`. Aplicar reglas de `_writing.md` Professional Writing.
 
 ---
 
@@ -422,11 +403,6 @@ Guardar la evaluación completa en `reports/{###}-{company-slug}-{YYYY-MM-DD}.md
 ## Risk Summary
 (una fila por señal de riesgo, orden fijo — ver la sección Risk Summary arriba)
 
-## H) Borradores de respuestas para la candidatura
-(solo si score >= 4.5 — borradores de respuestas para el formulario)
-
----
-
 ## Palabras clave extraídas
 (lista de 15-20 palabras clave de la oferta para optimización ATS)
 
@@ -454,7 +430,3 @@ Con columna Via (#1596) después de Company:
 ```markdown
 | # | Date | Company | Via | Role | Score | Status | PDF | Report | Notes |
 ```
-
-### 3. Observaciones salariales (solo desired ask)
-
-Si — y solo si — el usuario **declaró explícitamente un número deseado para ESTA candidatura** ("pediría 95k aquí"), añadir línea `desired` (source `user`) a `data/salary-observations.tsv`. Nunca inferir de la JD, score ni conversaciones pasadas.

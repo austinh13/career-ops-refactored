@@ -4,11 +4,9 @@
  * No Claude Code CLI required — uses OpenRouter free models with automatic fallback.
  *
  * Usage:
- *   node openrouter-runner.mjs scan              → Scan Greenhouse API companies for new listings
  *   node openrouter-runner.mjs evaluate <url>    → Evaluate a job by URL
  *   node openrouter-runner.mjs evaluate          → Paste job text interactively
  *   node openrouter-runner.mjs pipeline          → Process all pending URLs from pipeline.md
- *   node openrouter-runner.mjs apply <report_no> → Generate draft application form answers
  *   node openrouter-runner.mjs models            → List available free models
  *   node openrouter-runner.mjs help              → Show this help
  *
@@ -22,7 +20,6 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import readline from 'node:readline';
-import { loadYaml } from './lib/yaml-document.mjs';
 import { outputLanguageInstruction, parseOutputLanguage } from './profile-language.mjs';
 import { TSV_ADDITION_HEADER } from './tracker-parse.mjs';
 import { normalizedTrackerScore } from './lib/tracker-addition.mjs';
@@ -31,15 +28,12 @@ import {
 } from './reserve-report-num.mjs';
 import { TokenAccumulator, formatBreakdown, normalizeOpenAIUsage } from './utils/token-tracker.mjs';
 import { DEFAULT_USER_AGENT } from './user-agent.mjs';
-import { buildTitleFilter } from './title-keywords.mjs';
-import { appendToPipeline, appendToScanHistory, atomicWriteFile } from './scan.mjs';
+import { atomicWriteFile } from './lib/atomic-write.mjs';
 import { withPipelineLock } from './pipeline-lock.mjs';
-import { createAdmissionGate, formatSkipCounts } from './lib/admission-gate.mjs';
 import { localToday } from './lib/local-today.mjs';
 import { getCareerOpsRoot, getProfilePath } from './path-resolver.mjs';
 import { isMainModule } from './lib/is-main-module.mjs';
 import { withJdArchiveSection } from './lib/jd-archive-section.mjs';
-import { locateApplyReport } from './apply-scope.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const tracker = new TokenAccumulator();
@@ -492,44 +486,6 @@ async function fetchJobPage(url) {
 }
 
 // ---------------------------------------------------------------------------
-// portals.yml parser — reads the canonical schema with js-yaml (same library and
-// field names as scan.mjs: `title_filter.positive/negative` + `tracked_companies`),
-// so it never drifts from the main scanner. The runner's no-CLI scan path covers
-// companies that expose a direct JSON `api:`; careers_url-only / Playwright /
-// search-query companies are handled by the full /career-ops scan pipeline.
-// `rawOverride` lets tests feed YAML text directly (see test-all.mjs drift guard).
-// ---------------------------------------------------------------------------
-export function parsePortals(rawOverride) {
-  const raw = rawOverride ?? readFile('portals.yml');
-  if (!raw) throw new Error('portals.yml not found');
-  const config = loadYaml(raw) || {};
-
-  // The shared predicate rather than a second copy of the matching rules. This
-  // path kept its own `includes` loop, and the two had drifted three ways: an
-  // empty positive list accepted every title in scan.mjs and rejected every
-  // title here, AND-groups worked only in scan.mjs, and a non-string YAML entry
-  // was dropped there but coerced into a live keyword here. A `word:` prefix
-  // would have become the fourth — read as literal text, it would have matched
-  // nothing, so the shipped `word:Intern` would stop rejecting "Operations
-  // Intern" here while still working in scan.mjs.
-  //
-  // Side effect worth naming, since it changes this path's verdicts rather than
-  // just its structure: it now also gets the 2-3 char rule. Measured over 2324
-  // real titles that moves one verdict, and it moves it the permissive way —
-  // the negative "iOS" had been matching inside "Biosamples". Nothing becomes
-  // newly rejected.
-  const titleMatches = buildTitleFilter(config.title_filter);
-
-  // Companies with a direct JSON `api:` endpoint (the no-CLI scan path).
-  const tracked = Array.isArray(config.tracked_companies) ? config.tracked_companies : [];
-  const companies = tracked
-    .filter(c => c && c.api && c.enabled !== false)
-    .map(c => ({ name: String(c.name ?? c.company ?? 'Unknown'), api: String(c.api).trim() }));
-
-  return { companies, titleMatches, config };
-}
-
-// ---------------------------------------------------------------------------
 // pipeline.md management
 // ---------------------------------------------------------------------------
 function readPipeline() {
@@ -565,50 +521,6 @@ export async function markPipelineDone(url, { pipelinePath = path.join(DATA_ROOT
   });
 }
 
-// Both writes go through the shared writers in scan.mjs rather than this
-// module's own read-modify-write. Those writers hold pipeline-lock.mjs on the
-// file they touch, so this stops being a fourth, unlocked writer racing the
-// three appendToPipeline already names. The previous version read each file
-// whole, appended in memory, and wrote the whole thing back with a truncating
-// writeFileSync — so any row another scanner appended in between was erased,
-// silently, because every reader skips a malformed or missing row quietly.
-//
-// Delegating fixes three things at once that were all symptoms of hand-rolling
-// the write: the lock, the row format (formatScanHistoryRow emits every trailing
-// column; this module wrote seven and created a seven-column header), and the
-// date (the shared path stamps the local day, this one stamped the UTC day —
-// the defect #3240/#3241 fixed in the other scanners, which this module escaped
-// because that census finds scanners by looking for appendToScanHistory calls).
-//
-// It also picks up CAREER_OPS_DATA_DIR support for free: the shared paths are
-// DATA_ROOT-anchored, while the __dirname-relative paths here ignored it.
-//
-// Admission goes through the shared gate (#5478): the seen set compares
-// normalized URLs across scan-history, the pipeline and the tracker, and the
-// blacklist and location filter apply as they do in scan.mjs. The raw-URL sets
-// this built before re-queued a posting whose URL differed by a tracking
-// parameter, and nothing here read data/blacklist.md.
-export async function addToPipeline(entries, config = {}, gate = createAdmissionGate({ config })) {
-  // The shared writers take {url, company, title, location}; this module calls
-  // the title `role`.
-  const offers = entries.map(e => ({
-    url: e.url,
-    company: e.company,
-    title: e.role,
-    location: typeof e.location === 'string' ? e.location : '',
-    source: 'openrouter scan',
-  }));
-
-  const { admitted } = gate.partition(offers);
-  const skipped = formatSkipCounts(gate.counts);
-  if (skipped) console.log(`Skipped: ${skipped}`);
-  if (admitted.length === 0) return 0;
-
-  await appendToPipeline(admitted);
-  await appendToScanHistory(admitted, localToday());
-  return admitted.length;
-}
-
 function extractCompanySlug(text, url) {
   // Try to extract from text (e.g. "Senior Engineer at Acme" or "Company: Acme")
   const m = text.match(/(?:at|@|company[:\s]+)\s*([A-Z][A-Za-z0-9]{2,25})/);
@@ -627,49 +539,6 @@ function extractCompanySlug(text, url) {
 // ---------------------------------------------------------------------------
 // Commands
 // ---------------------------------------------------------------------------
-
-// -- SCAN --
-async function cmdScan() {
-  tracker.recordZeroToken('scan');
-  tracker.recordZeroToken('evaluation');
-  tracker.recordZeroToken('pdf payload');
-  console.log('Scanning Greenhouse portals...\n');
-
-  let portals;
-  try { portals = parsePortals(); }
-  catch (e) { console.error(e.message); return; }
-
-  const { companies, titleMatches, config } = portals;
-  console.log(`Greenhouse API companies: ${companies.length}\n`);
-
-  const found = [];
-  for (const c of companies) {
-    process.stdout.write(`  ${c.name.padEnd(25)} → `);
-    try {
-      assertSafeRemoteUrl(c.api);
-      const r = await fetch(c.api);
-      if (!r.ok) { console.log(`HTTP ${r.status}`); continue; }
-      const data = await r.json();
-      const jobs = data.jobs ?? [];
-      const matched = jobs.filter(j => titleMatches(j.title));
-      console.log(`${jobs.length} listings, ${matched.length} matched`);
-      for (const j of matched) {
-        // Skip postings without a public URL — falling back to the API
-        // endpoint would write an unusable link into the pipeline.
-        if (!j.absolute_url) continue;
-        found.push({ url: j.absolute_url, company: c.name, role: j.title, location: j.location?.name ?? '' });
-      }
-    } catch (e) {
-      console.log(`ERROR: ${e.message}`);
-    }
-  }
-
-  const added = await addToPipeline(found, config);
-  console.log(`\n✅ Scan complete. ${found.length} matches, ${added} new entries added to pipeline.md.`);
-  if (added > 0) {
-    console.log('\n→  node openrouter-runner.mjs pipeline\n   to evaluate pending listings.\n');
-  }
-}
 
 // -- EVALUATE --
 async function cmdEvaluate(input, ctx) {
@@ -822,75 +691,6 @@ async function cmdPipeline(ctx) {
   console.log('\n✅ Pipeline processing complete.\n');
 }
 
-// -- APPLY --
-async function cmdApply(ref, ctx) {
-  tracker.recordZeroToken('scan');
-  tracker.recordZeroToken('evaluation');
-  tracker.recordZeroToken('pdf payload');
-  const modeContent = readSystemFile('modes/apply.md') ?? '';
-
-  let reportContent;
-  let reportPath;
-  try {
-    const located = locateApplyReport(DATA_ROOT, ref, {
-      exists: (p) => fs.existsSync(p),
-      list: (dir) => (fs.existsSync(dir) ? fs.readdirSync(dir) : []),
-    });
-    if (!located.ok) {
-      console.error(`Report not found: ${ref}`);
-      return;
-    }
-    reportPath = located.path;
-  } catch (e) {
-    console.error(e instanceof Error ? e.message : String(e));
-    return;
-  }
-  try {
-    reportContent = fs.readFileSync(reportPath, 'utf8');
-  } catch {
-    reportContent = null;
-  }
-
-  if (!reportContent) { console.error('Could not read report content.'); return; }
-
-  // Score-gate: warn and confirm before applying to low-fit roles (AGENTS.md Ethical Use)
-  const scoreMatch = reportContent.match(/^\s*\*?\*?\s*(?:score|puntuaci[oó]n)\s*:\s*\*?\*?\s*(\d+(?:\.\d+)?)\s*\/\s*5/im);
-  const scoreValue = scoreMatch ? parseFloat(scoreMatch[1]) : NaN;
-  if (isFinite(scoreValue) && scoreValue < 4.0) {
-    console.log(`\n⚠️  This report scored ${scoreValue.toFixed(1)}/5 — below the 4.0/5 threshold.`);
-    console.log('Strongly discourage low-fit applications. Your time and the recruiter\'s time are both valuable.');
-    const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
-    const answer = await new Promise(resolve => {
-      rl.question('Proceed anyway? (yes/no): ', resolve);
-    });
-    rl.close();
-    if (answer.trim().toLowerCase() !== 'yes') {
-      console.log('Aborted.');
-      return;
-    }
-  }
-
-  console.log('Generating application form answers...');
-  const systemPrompt = buildSystemPrompt(modeContent, ctx);
-
-  let resultObj;
-  try {
-    resultObj = await callOpenRouter(
-      systemPrompt,
-      `Generate application form answers based on this evaluation report:\n\n${reportContent}`
-    );
-  } catch (e) {
-    console.error(`OpenRouter error: ${e.message}`);
-    return;
-  }
-  tracker.record('apply', resultObj.usage);
-  const result = resultObj.content;
-
-  console.log('\n─── APPLICATION ANSWERS ─────────────────────────────\n');
-  console.log(result);
-  console.log('\n─────────────────────────────────────────────────────\n');
-}
-
 // ---------------------------------------------------------------------------
 // Entry point
 // ---------------------------------------------------------------------------
@@ -902,15 +702,11 @@ if (invokedDirectly) loadEnvFile();
 const ctx = invokedDirectly ? loadContext() : null;
 
 // Load free models list before running any AI command (skip when a model is pinned)
-if (invokedDirectly && ['evaluate', 'eval', 'pipeline', 'apply', 'models'].includes(command) && !process.env.CAREER_OPS_MODEL) {
+if (invokedDirectly && ['evaluate', 'eval', 'pipeline', 'models'].includes(command) && !process.env.CAREER_OPS_MODEL) {
   await loadFreeModels();
 }
 
 if (invokedDirectly) switch (command) {
-  case 'scan':
-    await cmdScan();
-    break;
-
   case 'evaluate':
   case 'eval':
     await cmdEvaluate(args.join(' ').trim() || null, ctx);
@@ -918,11 +714,6 @@ if (invokedDirectly) switch (command) {
 
   case 'pipeline':
     await cmdPipeline(ctx);
-    break;
-
-  case 'apply':
-    if (!args[0]) { console.error('Usage: node openrouter-runner.mjs apply <report_num|report_path>'); break; }
-    await cmdApply(args[0], ctx);
     break;
 
   case 'models':
@@ -935,11 +726,9 @@ career-ops OpenRouter Runner
 Auto-fetches free models from OpenRouter API and rotates through them with fallback.
 
 COMMANDS:
-  node openrouter-runner.mjs scan              → Scan Greenhouse APIs for new matching listings
   node openrouter-runner.mjs evaluate <url>    → Evaluate a listing by URL
   node openrouter-runner.mjs evaluate          → Paste a job description interactively
   node openrouter-runner.mjs pipeline          → Batch-evaluate all pending entries in pipeline.md
-  node openrouter-runner.mjs apply <report_no> → Generate application form answers from a report
   node openrouter-runner.mjs models            → List available free models from OpenRouter
 
 SETUP:
@@ -954,7 +743,7 @@ MODEL SELECTION:
 `);
 }
 
-if (invokedDirectly && ['scan', 'evaluate', 'eval', 'pipeline', 'apply'].includes(command)) {
+if (invokedDirectly && ['evaluate', 'eval', 'pipeline'].includes(command)) {
   const modelName = process.env.CAREER_OPS_MODEL || activeModel || 'free-rotation';
   console.log('\n' + formatBreakdown(tracker, modelName, 'openrouter'));
 }

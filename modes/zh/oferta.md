@@ -133,8 +133,6 @@
 
 在**反思**列中，务必提炼出学到的核心教训或如果重新来过会如何改进。这对于体现资深度至关重要——初级候选人只描述过程，资深候选人能提炼方法论。
 
-**故事库同步：** 如果存在 `interview-prep/story-bank.md`，检查这些故事是否已在故事库中。如果不存在，将其追加进去，以便随着评估逐渐建立一个可随时调用的“黄金面试故事库”。
-
 **根据画像进行故事包装：**
 - **FDE** → 强调极限交付时间、应对客户紧急多变的需求。
 - **SA** → 强调架构权衡、技术栈选型背后的逻辑。
@@ -209,7 +207,6 @@
 | Posting legitimacy | Block G 的评级 | `✅ High Confidence`；Proceed with Caution / Suspicious 渲染为 `⚠️ {tier} — {一句话原因}` |
 | Employment classification | Block G 内的用工性质信号 | 检查已运行且无异常时 `✅ clear`；标记触发时 `⚠️ contractor-style language: "{引用原文}"`；无法运行时 `— not evaluated` |
 | Culture screen | Block A 的文化筛查字段 | `✅ pass`，或 `⚠️ caution — {证据}` / `⚠️ fail — {证据}`；未做筛查时 `— not evaluated` |
-| Interview red flags | `interview-prep/{company-slug}-redflags.md`（来自 `interview-redflag` 模式） | **交叉引用，不是复制：** 文件存在时写出其当前警告级别并附相对链接 —— `[{level}](../interview-prep/{company-slug}-redflags.md)`（相对于 `reports/`）；否则 `— no interview sessions yet` |
 | AI claims vs. infrastructure | Block G 中的 AI/基础设施一致性检查（如果存在） | 本报告包含该检查时镜像其结论（`✅ consistent` / `⚠️ {发现}`）；否则 `— not evaluated`。该检查一旦存在此行自动启用，无顺序依赖 |
 
 块格式：
@@ -222,7 +219,6 @@
 | Posting legitimacy | ✅ High Confidence |
 | Employment classification | ⚠️ contractor-style language: "{quoted phrase}" |
 | Culture screen | ⚠️ caution — {evidence} |
-| Interview red flags | — no interview sessions yet |
 | AI claims vs. infrastructure | — not evaluated |
 ```
 
@@ -280,11 +276,6 @@
 
 ## Risk Summary
 (每个风险信号一行，顺序固定 —— 见上文 Risk Summary 一节)
-
-## H) 开放性问题拟答草稿
-(仅在综合评分 >= 4.5 且申请表单有问答框时生成)
-
----
 
 ## ATS 关键词提取
 (列出 15-20 个从该 JD 中提取的高频核心技术/业务关键词，用于简历优化)

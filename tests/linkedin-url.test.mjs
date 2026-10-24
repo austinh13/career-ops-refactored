@@ -108,8 +108,3 @@ check('linkedInPathJobId reads the path without the host',
 // A browser bundle has to be able to load this file, so it must import nothing.
 const src = readFileSync(join(ROOT, 'lib', 'linkedin-url.mjs'), 'utf-8');
 check('the module has no imports', !/^\s*import\b|\bimport\s*\(|\brequire\s*\(/m.test(src));
-
-// liveness-api.mjs is a SYSTEM_PATHS file: an upgraded install whose updater
-// had no entry for this module would check out a liveness-api that cannot load.
-const manifestSrc = readFileSync(join(ROOT, 'lib', 'update-manifest.mjs'), 'utf-8');
-check('the updater ships lib/linkedin-url.mjs', manifestSrc.includes("'lib/linkedin-url.mjs'"));

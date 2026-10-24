@@ -78,8 +78,6 @@ Top 5 Änderungen am Lebenslauf + Top 5 Änderungen am LinkedIn-Profil, um den M
 
 Die Spalte **Reflection** erfasst, was gelernt wurde oder was man heute anders machen würde. Das signalisiert Seniorität — Junior-Kandidaten beschreiben, was passiert ist; Senior-Kandidaten ziehen Lehren daraus.
 
-**Story Bank:** Wenn `interview-prep/story-bank.md` existiert, prüfen, ob die Stories schon dort stehen. Falls nicht, neue ergänzen. Mit der Zeit entsteht so eine wiederverwendbare Bank von 5-10 Master-Stories, die sich an jede Frage im Vorstellungsgespräch anpassen lassen.
-
 **Ausgewählt und an den Archetyp angepasst:**
 - FDE → Lieferungs-Tempo und Kundennähe betonen
 - SA → Architektur-Entscheidungen betonen

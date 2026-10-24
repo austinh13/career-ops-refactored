@@ -59,7 +59,7 @@ const floor = NODE_MIN.split('.').slice(0, 2).join('.');
 // ── Every restatement matches ────────────────────────────────────────
 {
   const engines = (rel) => JSON.parse(readFileSync(join(ROOT, rel), 'utf8')).engines?.node;
-  for (const rel of ['package.json', 'scaffolder/package.json']) {
+  for (const rel of ['package.json']) {
     const got = engines(rel);
     ok(got === NODE_ENGINES, `${rel} engines.node is "${NODE_ENGINES}" (found ${JSON.stringify(got)})`);
   }

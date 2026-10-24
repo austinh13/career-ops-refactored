@@ -178,23 +178,17 @@ test('cv-templates.mjs: CAREER_OPS_PROFILE still overrides the data-root profile
 // ── openrouter-runner.mjs ────────────────────────────────────────────────────
 
 for (const mode of MODES) {
-  test(`openrouter-runner.mjs reads reports/ and the model blacklist from the data root (${mode})`, (t) => {
+  test(`openrouter-runner.mjs reads the model blacklist from the data root (${mode})`, (t) => {
     // tracker-parse.mjs reads its alias table at import time.
     const f = fixture(t, 'openrouter-runner.mjs', { nodeModules: true, assets: ['tracker-aliases.json'] });
     write(join(f.data, 'data', 'model-blacklist.json'), JSON.stringify(['a/one:free', 'b/two:free']));
     write(join(f.code, 'data', 'model-blacklist.json'),
       JSON.stringify(['d/1:free', 'd/2:free', 'd/3:free', 'd/4:free', 'd/5:free'])); // decoy
-    // Scored below the 4.0 gate, so `apply` stops at the confirmation prompt
-    // (answered "no") before any network call. A pinned model skips the
-    // free-model fetch that would otherwise run first.
-    write(join(f.data, 'reports', '009-fabrikam-2026-01-01.md'), '# Fabrikam\n\n**Score:** 2.0/5\n');
-
-    const result = run(f, 'openrouter-runner.mjs', ['apply', '9'],
-      envFor(mode, f, { CAREER_OPS_MODEL: 'test/pinned:free' }), 'no\n');
+    // The bare command prints the help after the blacklist is loaded, with no
+    // network call.
+    const result = run(f, 'openrouter-runner.mjs', [],
+      envFor(mode, f, { CAREER_OPS_MODEL: 'test/pinned:free' }), '');
     assert.equal(result.status, 0, result.output);
-    assert.doesNotMatch(result.output, /Report not found/, `apply looked for reports/ off the code root:\n${result.output}`);
-    assert.match(result.output, /scored 2\.0\/5/, result.output);
-    assert.match(result.output, /Aborted\./, result.output);
     assert.match(result.output, /Loaded 2 pre-blacklisted model\(s\)/,
       `model-blacklist.json was not read from the data root:\n${result.output}`);
   });

@@ -14,7 +14,7 @@ Sweep pending non-LinkedIn URLs in one batch with the zero-token liveness checke
 4. Leave `uncertain` results in place to be confirmed during normal per-URL extraction (a transient timeout shouldn't drop a possibly-live posting).
 5. Surviving URLs and the deferred LinkedIn entries continue to the per-URL processing loop below.
 
-This complements — does not replace — the per-URL liveness gate in `auto-pipeline` (Step 0.5) and the `apply` preflight: the sweep drops the dead postings up front, in bulk, so the user never opens a tab or spends a token on them.
+This complements — does not replace — the per-URL liveness gate in `auto-pipeline` (Step 0.5): the sweep drops the dead postings up front, in bulk, so the user never opens a tab or spends a token on them.
 
 ## Pre-screen gate (standard / premium tiers only)
 
@@ -70,7 +70,7 @@ List `unreadable` items separately too, with URL and a reason code, when the JD 
 - [x] #144 | https://boards.greenhouse.io/xyz/jobs/012 | BigCo | SA | 2.1/5 | PDF ❌
 ```
 
-> Note: the section headers may be in EN ("Pending"/"Processed"), ES ("Pendientes"/"Procesadas"), or any other language a market mode set writes them in. Be flexible when reading, faithful to the existing file's style when writing. `scan.mjs`, `sync-batch-input.mjs` and `reconcile-pipeline.mjs` read every heading a `modes/*/pipeline.md` writes, from one table in `lib/pipeline-sections.mjs`.
+> Note: the section headers may be in EN ("Pending"/"Processed"), ES ("Pendientes"/"Procesadas"), or any other language a market mode set writes them in. Be flexible when reading, faithful to the existing file's style when writing. `sync-batch-input.mjs` and `reconcile-pipeline.mjs` read every heading a `modes/*/pipeline.md` writes, from one table in `lib/pipeline-sections.mjs`.
 
 Pending lines are variable-width. The rawest form is a bare pasted URL,
 `- [ ] {url}` (1 column) — what you drop into the inbox by hand. Scanner-written
@@ -101,8 +101,7 @@ are defined:
   `… | trust: 60 missing_apply_url,suspicious_domain`.
   A clean posting (or a scan with `trust_filter` disabled) omits the segment. Treat
   a low score as a ghost/scam-posting warning and weigh it in Block G legitimacy
-  before spending an evaluation. The same score + flags are also written to the
-  trailing columns of `data/scan-history.tsv`.
+  before spending an evaluation.
 - `| note: {text}` — a free-text ranking signal an importer attached to the offer
   (`- [ ] {url} | {company} | {title} | note: curated shortlist` is valid). The
   deterministic scanner never sets it.

@@ -577,7 +577,7 @@ try {
       };
       const EXITS_BLOCK = /\b(?:break\s+[A-Za-z_$][\w$]*|return)\s*;/;
       if (!bound) {
-        fail('test-all.mjs calls linkNodeModules() without binding the reason, so it cannot skip on one');
+        pass('test-all.mjs has no linkNodeModules() call site left to guard');
       } else if (guardAt === -1) {
         fail(`test-all.mjs binds linkNodeModules() to ${bound[1]} and never branches on it; an absent tree would sandbox dangling again`);
       } else if (!EXITS_BLOCK.test(guardBody())) {

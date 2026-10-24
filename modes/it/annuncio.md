@@ -79,8 +79,6 @@ Fornire le 5 modifiche principali al CV + le 5 modifiche principali al profilo L
 
 La colonna **Reflection** cattura cosa si è imparato o cosa si farebbe diversamente. Questo elemento segnala seniority: i profili junior descrivono cosa è successo, i senior ne traggono insegnamenti e linee guida.
 
-**Story Bank:** Se `interview-prep/story-bank.md` esiste, verificare se le storie sono già presenti. In caso contrario, aggiungerle. Con il tempo si costruisce un archivio riutilizzabile di 5-10 storie principali adattabili a qualsiasi colloquio.
-
 **Storie inquadrate per archetipo:**
 - FDE -> evidenziare velocità di consegna e vicinanza al cliente
 - SA -> evidenziare decisioni di architettura e trade-off tecnici

@@ -2,7 +2,7 @@
 /**
  * rank-pipeline.mjs — opt-in LLM relevance re-ranker for `data/pipeline.md` (#1144)
  *
- * The core scan stays 100% zero-token: `scan.mjs` is not touched, and nothing here
+ * Nothing here
  * runs unless you invoke this script yourself.
  *
  * It ANNOTATES pending pipeline rows with a labeled `rank: {score}/5 — {reason}`
@@ -35,11 +35,21 @@ import { tmpdir } from 'os';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 import { flagValue, hasFlag, safeIntFlag, validateFlags } from './lib/cli-flags.mjs';
-import { sanitizeMarkdownField } from './scan.mjs';
 import { withPipelineLock } from './pipeline-lock.mjs';
 import { isMainModule } from './lib/is-main-module.mjs';
 import { getCareerOpsRoot } from './path-resolver.mjs';
 import { readRememberedCli } from './lib/agent-cli.mjs';
+
+// One-line, pipe-safe markdown cell: collapses newlines/tabs, escapes link
+// brackets and backslashes, and maps `|` to `/`.
+function sanitizeMarkdownField(value) {
+  return String(value ?? '')
+    .replace(/[\r\n\t]+/g, ' ')
+    .replace(/ {2,}/g, ' ')
+    .trim()
+    .replace(/[\\[\]]/g, (char) => '\\' + char)
+    .replace(/\|/g, '/');
+}
 
 const CAREER_OPS = dirname(fileURLToPath(import.meta.url));
 const DATA_ROOT = getCareerOpsRoot();
@@ -374,7 +384,7 @@ async function main(args) {
   }
 
   if (!existsSync(PIPELINE_PATH)) {
-    console.log('No data/pipeline.md yet — run a scan first. Nothing to rank.');
+    console.log('No data/pipeline.md yet — add job URLs to it first. Nothing to rank.');
     return 0;
   }
 

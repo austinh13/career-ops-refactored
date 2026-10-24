@@ -34,7 +34,7 @@ const PRODUCER_RE = /node (?:build-cv-html|build-cv-latex|patch-latex-content)\.
 const GATE_RE = /node (?:verify-cv-facts|generate-pdf|generate-latex)\.mjs/;
 // Renderers that run the gate in code. Asserted below, so this list cannot
 // claim a renderer gates when it does not.
-const GATED_RENDERERS = ['generate-pdf.mjs', 'generate-latex.mjs', 'generate-cover-letter.mjs'];
+const GATED_RENDERERS = ['generate-pdf.mjs', 'generate-latex.mjs'];
 
 // Forward slashes on every platform: relative() gives `modes\pdf.md` on Windows.
 const repoPath = (path) => relative(ROOT, path).split(sep).join('/');
@@ -54,7 +54,6 @@ test('every mode that builds or writes a CV runs the fact gate', () => {
 // document, each with the reason.
 const NOT_CANDIDATE_DOCUMENTS = new Map([
   ['archive-posting.mjs', 'archives a job posting the candidate is reading, not a document they send'],
-  ['img-to-pdf.mjs', 'converts images the user supplies, and writes no text of its own'],
   ['install-latex-engine.mjs', 'installs tectonic; it renders nothing'],
   ['test-all.mjs', 'the test runner'],
 ]);

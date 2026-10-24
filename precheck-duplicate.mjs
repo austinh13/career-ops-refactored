@@ -23,7 +23,7 @@
  *
  * The tracker comes from resolveTrackerPath(getCareerOpsRoot()), so
  * CAREER_OPS_TRACKER / CAREER_OPS_ROOT / CAREER_OPS_DATA_DIR / .career-ops-data
- * are honoured exactly as in set-status.mjs.
+ * are honoured exactly as in merge-tracker.mjs.
  */
 
 import { readFileSync, existsSync } from 'fs';
@@ -35,11 +35,29 @@ import {
   loadCanonicalStates, resolveCanonicalStateId,
 } from './tracker-utils.mjs';
 import { normalizeUrl } from './url-key.mjs';
-import { titleIdentityKey } from './detect-reposts.mjs';
 import { roleFuzzyMatch } from './role-matcher.mjs';
 import { getCareerOpsRoot } from './path-resolver.mjs';
 import { flagValue, validateFlags } from './lib/cli-flags.mjs';
 import { isMainModule } from './lib/is-main-module.mjs';
+
+/**
+ * Order- and punctuation-insensitive identity of a job title: accents and case
+ * folded, non-alphanumerics dropped, words de-duplicated and sorted. A title
+ * that folds to nothing (all punctuation) falls back to its lowercased raw text.
+ */
+function titleIdentityKey(title) {
+  const raw = String(title ?? '').trim();
+  const words = raw
+    .normalize('NFD')
+    .replace(/\p{Mn}/gu, '')
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu, ' ')
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+  if (words.length === 0) return raw.toLowerCase();
+  return [...new Set(words)].sort().join(' ');
+}
 
 const CANONICAL_STATES = loadCanonicalStates(join(dirname(fileURLToPath(import.meta.url)), 'templates', 'states.yml'));
 

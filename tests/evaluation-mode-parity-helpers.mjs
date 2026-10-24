@@ -22,7 +22,7 @@ export const KNOWN_EVALUATION_MODES = [
   'pt/oferta.md', 'ru/oferta.md', 'tr/is-ilani.md', 'ua/oferta.md', 'zh-TW/oferta.md', 'zh/oferta.md',
 ];
 
-const REQUIRED_HEADINGS = ['A)', 'B)', 'C)', 'D)', 'E)', 'F)', 'G)', 'Risk Summary', 'H)'];
+const REQUIRED_HEADINGS = ['A)', 'B)', 'C)', 'D)', 'E)', 'F)', 'G)', 'Risk Summary'];
 const REQUIRED_LABELS = ['Date', 'URL', 'Archetype', 'Score', 'Legitimacy', 'PDF'];
 
 /** Read a mode or a Windows checkout's one-line symlink placeholder.
@@ -138,7 +138,7 @@ export function structuralGaps(text) {
     else if (count > 1) gaps.push(`duplicate ## ${name}`);
   }
   if (gaps.length === 0 && headings.join('|') !== REQUIRED_HEADINGS.join('|')) {
-    gaps.push('report section order A)–G) → Risk Summary → H)');
+    gaps.push('report section order A)–G) → Risk Summary');
   }
   // Machine Summary can precede A), so stop at the first H2, not just at A).
   const firstSection = lines.findIndex(line => /^ {0,3}##[ \t]+/.test(line));

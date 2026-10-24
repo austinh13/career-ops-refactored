@@ -148,7 +148,7 @@ try {
   }
 
   // Template guard: shipped templates read the vars with :root defaults, no circular refs
-  for (const tpl of ['templates/cv-template.html', 'templates/cover-letter-template.html']) {
+  for (const tpl of ['templates/cv-template.html']) {
     const src = readFileSync(join(ROOT, tpl), 'utf-8');
     const hasRoot = /:root\s*\{[^}]*--accent-color:[^}]*--font-family:[^}]*--font-size:[^}]*--page-margin:/s.test(src);
     const usesVars = src.includes('var(--accent-color)') && src.includes('var(--font-family)') && src.includes('var(--font-size)') && src.includes('var(--page-margin)');

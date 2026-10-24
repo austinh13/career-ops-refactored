@@ -34,7 +34,6 @@
 | _profile.md | `modes/_profile.md` | 常に（ユーザー固有のアーキタイプ、ナラティブ、交渉） |
 | writing-samples/ | `writing-samples/` | 候補者が外部に出す文章を生成する場合。まず `_profile.md` のキャッシュ済み `## Writing Style` を確認し、存在しない場合だけファイルを読む |
 | voice-dna.md | `voice-dna.md`（プロジェクトルート、存在する場合） | 候補者が外部に出す文章を生成する場合。AI っぽさを避ける guardrail + voice。下の Voice DNA precedence を参照 |
-| interview-prep | `interview-prep/story-bank.md`, `interview-prep/{company}-{role}.md` | ATS フォーム回答 / 面接コンテンツを生成する場合。ユーザー自身の STAR stories と prep notes。ナラティブと表現には使ってよいが、数値の claim は自動的には `cv.md` と同等ではない — AGENTS.md の Source-of-Truth Boundary の階層化（#2947）と `story-provenance-check.mjs` を参照。`apply` / `match-star` と interview modes が使用 |
 
 **ルール：proof point のメトリクスを絶対にハードコードしない。** 評価時に `cv.md` と `article-digest.md` から読み取ること。
 **ルール：記事・プロジェクトのメトリクスは、`article-digest.md` が `cv.md` より優先される。**
@@ -165,9 +164,9 @@ Archetype を検出した後、`modes/_profile.md` を読み、該当 archetype 
 | Playwright | 求人検証（browser_navigate + browser_snapshot）。**NEVER 2+ agents with Playwright in parallel.** |
 | Read | cv.md, _profile.md, article-digest.md, cv-template.html |
 | Write | Temporary HTML for PDF, reports .md, `batch/tracker-additions/` の tracker 追加用 TSV（`applications.md` は直接書き換えない） |
-| Edit | report など生成済みコンテンツの修正。tracker の表は直接編集しない：新しい行は TSV で追加して `node merge-tracker.mjs` でマージし、status と notes の変更は `node set-status.mjs` で行う |
+| Edit | report など生成済みコンテンツの修正。tracker の表は直接編集しない：新しい行は TSV で追加して `node merge-tracker.mjs` でマージする |
 | Canva MCP | Optional visual CV generation. Base design を duplicate し、text を edit して PDF export。`profile.yml` の `cv.canva_resume_design_id` が必要 |
-| Bash | `node generate-pdf.mjs`, `node merge-tracker.mjs`, `node set-status.mjs` |
+| Bash | `node generate-pdf.mjs`, `node merge-tracker.mjs` |
 
 ### Time-to-offer priority
 - Working demo + metrics > perfection

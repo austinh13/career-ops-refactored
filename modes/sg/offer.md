@@ -58,22 +58,6 @@ Add to the standard Block G checks:
    against the employer's own posting. Wild inconsistency is a legitimacy
    signal, not just a comp question.
 
-### Block H — Application Answers (Singapore additions)
-
-Standard Block H answers apply, with these Singapore-specific framings:
-
-- **Work authorization:** from the profile's `sg.work_status` — foreign:
-  "Employment Pass sponsorship required — I am not currently authorized to
-  work in Singapore." Never claim PR or citizenship the profile does not
-  support.
-- **Expected salary:** state as monthly base in SGD, from `profile.yml`
-  (e.g. "S$XX,000/month base, negotiable on total package"), and note
-  relocation explicitly when relevant.
-- **Notice period:** answer in the unit the form asks (weeks or months),
-  cross-checked against the candidate's real availability.
-- **"How did you hear about us?":** answer truthfully from the candidate's
-  actual source; never select LinkedIn unless that was genuinely the source.
-
 ## Report header (Singapore additions)
 
 In addition to the canonical header, include:

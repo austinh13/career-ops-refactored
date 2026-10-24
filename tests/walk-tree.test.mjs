@@ -514,15 +514,6 @@ export function recursiveDirWalkers(src) {
 // The two walks that stay hand-rolled, each with the reason it cannot be the
 // shared one. An entry here is a review event, not a formality.
 const EXEMPT = new Map([
-  ['plugins/_lock.mjs', [
-    'walk',
-    // Hashes a third-party plugin tree for integrity. It must THROW on a
-    // symlink, on an unreadable directory, and on any non-regular file —
-    // walkTree silently ignores the last of those, and an un-hashed entry in an
-    // integrity hash is exactly the hole the hash exists to close. Bending
-    // walkTree to express "fail on a fifo" would be bending a shared walker
-    // around one caller's threat model.
-  ]],
   ['intake.mjs', [
     'claimRealDirs', 'walk',
     // Deliberately follows symlinks (a symlinked master CV is a natural setup)

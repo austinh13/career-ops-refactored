@@ -42,7 +42,7 @@ export const HEADER_ALIASES = (() => {
     throw new Error(
       `tracker-parse.mjs: cannot load tracker-aliases.json (${e.message}). ` +
       'The file ships with career-ops next to tracker-parse.mjs — restore it ' +
-      'from the repo or re-run: node update-system.mjs apply',
+      'from the repo.',
     );
   }
 })();

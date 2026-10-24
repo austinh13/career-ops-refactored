@@ -36,7 +36,6 @@ Alleen de onderstaande bestanden mogen worden gebruikt voor kandidaatgerichte in
 | profile.yml | `config/profile.yml` | ALTIJD (identiteit en doelrollen) |
 | _profile.md | `modes/_profile.md` | ALTIJD (archetypen, verhaal en onderhandeling) |
 | writing-samples/ en voice-dna.md | `writing-samples/`, `voice-dna.md` (indien aanwezig) | Bij kandidaatgerichte tekst; gebruik eerst de gecachte sectie `## Writing Style` in `_profile.md` en gebruik voice-dna.md om AI-achtige formuleringen af te vangen en de stem te bewaken |
-| interview-prep | `interview-prep/story-bank.md`, `interview-prep/{company}-{role}.md` | Voor formulierantwoorden en sollicitatiegesprekken; bevat eigen STAR-verhalen en notities van de gebruiker |
 | _custom.md | `modes/_custom.md` (indien aanwezig) | ALTIJD (vaste opmaak-, inhouds- en workflowregels; geen bron voor feitelijke claims) |
 
 **REGEL: codeer NOOIT metrics uit proof points.** Lees ze uit `cv.md` en `article-digest.md` op het moment van evaluatie.
@@ -222,5 +221,5 @@ Nederland en België gebruiken deels dezelfde taal, maar hebben verschillende ar
 | Playwright | Controleer of de vacatures actief zijn (browser_navigate + browser_snapshot), extraheer de vacatures uit SPA's. **KRITIEK: NOOIT 2+ agenten parallel met Playwright -- ze delen dezelfde browserinstantie** |
 | Read | `config/profile.yml`, cv.md, article-digest.md, `_profile.md`, `_custom.md`, voice-dna.md, writing-samples/ en cv-template.html |
 | Write | Tijdelijke HTML voor PDF, rapporten .md en TSV-bestanden in `batch/tracker-additions/` |
-| Edit | Bestaande rapportinhoud bijwerken; bewerk `applications.md` nooit rechtstreeks: nieuwe rijen gaan als TSV via `node merge-tracker.mjs`, status- en notitiewijzigingen via `node set-status.mjs` |
-| Bash | `node generate-pdf.mjs`, `node merge-tracker.mjs`, `node set-status.mjs` |
+| Edit | Bestaande rapportinhoud bijwerken; bewerk `applications.md` nooit rechtstreeks: nieuwe rijen gaan als TSV via `node merge-tracker.mjs` |
+| Bash | `node generate-pdf.mjs`, `node merge-tracker.mjs` |

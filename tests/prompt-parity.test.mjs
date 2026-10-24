@@ -23,9 +23,9 @@ try {
   const trackerInstruction = section(oferta, '- Score: copy the already-decided', '\n- Status:');
   const batchScoreInstruction = section(batch, '#### Global Score', '#### Machine Summary');
   assert(
-    shared.includes('A–H are report sections, not numeric inputs to average')
-      && trackerInstruction.includes('A–H are report sections, not scores to average')
-      && batchScoreInstruction.includes('Do not average report blocks A–H'),
+    shared.includes('A–G are report sections, not numeric inputs to average')
+      && trackerInstruction.includes('A–G are report sections, not scores to average')
+      && batchScoreInstruction.includes('Do not average report blocks A–G'),
     'all evaluation paths keep report blocks separate from scoring dimensions',
   );
   assert(

@@ -5,7 +5,6 @@ import { pass, fail } from './helpers.mjs';
 
 const ROOT = join(fileURLToPath(new URL('.', import.meta.url)), '..');
 const oferta = readFileSync(join(ROOT, 'modes', 'oferta.md'), 'utf8');
-const apply = readFileSync(join(ROOT, 'modes', 'apply.md'), 'utf8');
 const batch = readFileSync(join(ROOT, 'batch', 'batch-prompt.md'), 'utf8');
 
 console.log('\nFixed-term contract disclosure (#4534)');
@@ -51,23 +50,6 @@ check(
     && /verify current benchmarks/i.test(signal)
     && /Never state or invent a percentage premium, market rate, entitlement, or legal conclusion/i.test(signal),
   'negotiation safeguards are incomplete',
-);
-
-const applyStep = apply.match(/## Step 5e — Fixed-term contract disclosure[\s\S]*?(?=\n\*\*Applying to several roles)/)?.[0] ?? '';
-check('apply has a fixed-term preflight step', Boolean(applyStep), 'missing Step 5e');
-check(
-  'apply warns before drafting and then continues',
-  /Before drafting answers/i.test(applyStep)
-    && /Warn once and continue immediately/i.test(applyStep)
-    && /never require acknowledgment/i.test(applyStep),
-  'warn-before-answer or continuation behavior is missing',
-);
-check(
-  'apply never fills, blocks, or invents terms',
-  /Never auto-answer or alter a form field/i.test(applyStep)
-    && /never block or discourage/i.test(applyStep)
-    && /Never invent a duration, percentage premium, market rate, entitlement/i.test(applyStep),
-  'apply safety boundary is incomplete',
 );
 
 check(

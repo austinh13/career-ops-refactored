@@ -88,7 +88,7 @@ test('absolute local image is validated and inlined', () => {
 });
 
 test('project-relative image is validated and inlined', () => {
-  const { html } = render(payload('docs/logo.png', 'square'), { profilePhoto: 'docs/logo.png' });
+  const { html } = render(payload('tests/fixtures/avatar-8x8.png', 'square'), { profilePhoto: 'tests/fixtures/avatar-8x8.png' });
   assert.match(html, /class="cv-photo cv-photo--square"/);
   assert.match(html, /src="data:image\/png;base64,/);
 });
@@ -113,7 +113,7 @@ test('a payload photo path that config/profile.yml does not name is refused (#50
   writeFileSync(secret, ONE_PIXEL_PNG);
   const cases = [
     ['profile has no photo', undefined],
-    ['profile names a different photo', 'docs/logo.png'],
+    ['profile names a different photo', 'tests/fixtures/avatar-8x8.png'],
   ];
   for (const [label, profilePhoto] of cases) {
     const { result, output } = buildWith(payload(secret), profilePhoto);
@@ -124,7 +124,7 @@ test('a payload photo path that config/profile.yml does not name is refused (#50
 });
 
 test('a relative path that climbs out of the project is refused unless the profile names it (#5094)', () => {
-  const { result, output } = buildWith(payload('../../../../etc/hosts.png'), 'docs/logo.png');
+  const { result, output } = buildWith(payload('../../../../etc/hosts.png'), 'tests/fixtures/avatar-8x8.png');
   assert.ok(exitedNonZero(result), describeSpawn(result, 'expected a non-zero exit'));
   assert.match(result.stderr, /does not match candidate\.photo in config\/profile\.yml/);
   assert.equal(existsSync(output), false);

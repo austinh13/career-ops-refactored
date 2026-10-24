@@ -51,7 +51,6 @@ language:
 |---------|-------|------|
 | `_shared.md` | `modes/_shared.md` (EN) | 共通コンテキスト、アーキタイプ、グローバルルール、日本市場の特記事項 |
 | `kyujin.md` | `modes/oferta.md` (EN) | 求人の完全評価（A-F + G legitimacy ブロック） |
-| `oubo.md` | `modes/apply.md` (EN) | 応募フォーム記入のライブアシスタント |
 | `pipeline.md` | `modes/pipeline.md` (EN) | URL のインボックス / 求人の Second Brain |
 
 残りのモード（`scan`、`batch`、`pdf`、`tracker`、`auto-pipeline`、`deep`、`contacto`、`ofertas`、`project`、`training`）は意図的にこの PR に含めていません。これらは主にツール配管、パス、設定コマンドで構成されており、言語非依存であるべきだからです。

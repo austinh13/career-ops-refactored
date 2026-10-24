@@ -131,7 +131,7 @@ test('openrouter-runner evaluate: system modes come from the checkout, user file
   const base = mkdtempSync(join(tmpdir(), 'split-root-or-eval-'));
   try {
     const dataRoot = makeDataRoot(base);
-    for (const mode of ['_shared.md', 'oferta.md', 'auto-pipeline.md', 'apply.md']) {
+    for (const mode of ['_shared.md', 'oferta.md', 'auto-pipeline.md']) {
       assert.ok(!existsSync(join(dataRoot, 'modes', mode)), `fixture error: the data root must not hold modes/${mode}`);
     }
 
@@ -146,20 +146,6 @@ test('openrouter-runner evaluate: system modes come from the checkout, user file
     // The report still follows the data root, numbered after the reports there.
     const written = readdirSync(join(dataRoot, 'reports')).filter((f) => f.startsWith('004-'));
     assert.equal(written.length, 1, `expected report 004 in the data root, found: ${readdirSync(join(dataRoot, 'reports')).join(', ')}`);
-  } finally {
-    rmSync(base, { recursive: true, force: true });
-  }
-});
-
-test('openrouter-runner apply: modes/apply.md comes from the checkout', () => {
-  const base = mkdtempSync(join(tmpdir(), 'split-root-or-apply-'));
-  try {
-    const dataRoot = makeDataRoot(base);
-    const prompt = sentSystemPrompt(base, dataRoot, ['apply', '1']);
-
-    assert.ok(prompt.includes(systemMode('_shared.md')), 'the system prompt is missing the checkout\'s modes/_shared.md');
-    assert.ok(prompt.includes(systemMode('apply.md')), 'the system prompt is missing the checkout\'s modes/apply.md');
-    assert.ok(prompt.includes('DATA-ROOT-PROFILE-MARKER'), 'the system prompt is missing the data root\'s modes/_profile.md');
   } finally {
     rmSync(base, { recursive: true, force: true });
   }

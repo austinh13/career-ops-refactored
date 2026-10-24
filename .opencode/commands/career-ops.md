@@ -1,5 +1,5 @@
 ---
-description: career-ops AI job search agent: evaluate offers, scan portals, track applications
+description: career-ops AI agent: grade job offers and tailor your CV
 ---
 
 # career-ops

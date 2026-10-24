@@ -194,32 +194,6 @@ d. Report: PDF dosya yolu, dosya boyutu, Canva tasarım URL'si (manuel ince ayar
 - `find_and_replace_text` hiçbir eşleşme bulamazsa → daha geniş alt dize (substring) eşleştirmesini dene
 - Otomatik düzenleme başarısız olursa kullanıcının manuel olarak düzenleyebilmesi için daima Canva tasarım URL'sini sun
 
-## Ön Yazı Alt Akışı (Cover Letter Sub-flow)
-
-CV PDF'sini ürettikten sonra, kullanıcıya bir ön yazı (cover letter) oluşturmayı teklif et:
-
-```text
-CV PDF oluşturuldu: output/{path}
-
-Bu rol için bir ön yazı (cover letter) da ister misiniz?
-- Hemen bir tane oluşturmak için "yes" (evet) veya "cover letter" (ön yazı) deyin
-- Ya da daha sonra `/career-ops cover {slug}` çalıştırın
-```
-
-Ön yazıya `voice-dna.md` (eğer varsa) uygula — tam bariyer koruması (guardrail) ve sohbete dayalı (conversational) ses (Seviye 1 + Seviye 2) dahildir. CV PDF'sinin kendisi yalnızca Seviye 1 (formal ATS dili - register) kalır. Bkz. `_writing.md` → Voice DNA.
-
-Kullanıcı "evet" derse, slug modunda `modes/cover.md` dosyasından tam ön yazı akışını çalıştır:
-1. Başlangıç noktası olarak değerlendirme raporundan mevcut `## Cover Letter Draft` bölümünü yükle (Load)
-2. Şirket araştırmasını çalıştır (cover.md Adım 3)
-3. Onay (confirmation) için anahtar kelime (keyword) listesi sun (Adım 4)
-4. Varsa her türlü eksiği/boşluğu (gap) ortaya çıkar (Adım 5)
-5. Dört temel soruyu sor: neden (why) / sorunlar (problems) / yaklaşım (approach) / üslup (tone) (Adım 6)
-6. Sohbette (chat) taslağı çıkar, onay bekle (Adım 7-8)
-7. `node generate-cover-letter.mjs` üzerinden ön yazı PDF'i üret (Adım 9)
-8. Her iki PDF dosya yolunu (path) da rapora (Report) dahil et
-
-Yukarıdaki etkileşimli adımlardan geçmeden ön yazı PDF'ini otomatik (auto-generate) OLUŞTURMA.
-
 ## Üretim Sonrası (Post-generation)
 
 Eğer iş (job) zaten kayıtlıysa takipçiyi (tracker) güncelle: PDF sütununu ❌ değerinden ✅ değerine değiştir.

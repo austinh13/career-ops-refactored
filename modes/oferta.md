@@ -1,4 +1,4 @@
-# Mode: job — Full A-H Evaluation
+# Mode: job — Full A-G Evaluation
 
 When the candidate pastes a job (text or URL), ALWAYS deliver the 7 blocks (A-F evaluation + G legitimacy):
 
@@ -8,7 +8,7 @@ When the candidate pastes a job (text or URL), ALWAYS deliver the 7 blocks (A-F 
 
 ## Liveness gate (URL inputs)
 
-When the candidate pastes a **URL** (not JD text), confirm the posting is still live before doing any evaluation. A dead link must never reach Block A — a 404/expired page wastes a full A-H evaluation, report, and PDF on phantom content.
+When the candidate pastes a **URL** (not JD text), confirm the posting is still live before doing any evaluation. A dead link must never reach Block A — a 404/expired page wastes a full A-G evaluation, report, and PDF on phantom content.
 
 **LinkedIn URLs:** first apply AGENTS.md → **LinkedIn JD loading guard (#4121)**, including on direct `oferta` entry. Reuse prior content and the one-attempt budget across mode handoffs; it overrides the generic CLI/browser fallback below. A missing JD or stuck skeleton stays unconfirmed even with a title and Apply button. Stop before Block A and all artifact/tracker writes until real JD text is available; never navigate again just to resolve this gate.
 
@@ -36,7 +36,7 @@ If `data/blacklist.md` exists, check both the posting's company and posting URL 
 
 1. On a hit, **stop before Block A** and surface the candidate's own recorded decision:
    > "{Company} is on your blacklist (since {Since}): *{Reason}*. Do you still want me to evaluate this posting?"
-2. Wait for an explicit answer — never silently refuse, never silently proceed. The candidate's call always wins (same HITL spirit as the score < 4.0 rule): an explicit yes runs the full A-H evaluation as normal (note the override in the report notes); anything else stops here with no evaluation, report, or CV.
+2. Wait for an explicit answer — never silently refuse, never silently proceed. The candidate's call always wins (same HITL spirit as the score < 4.0 rule): an explicit yes runs the full A-G evaluation as normal (note the override in the report notes); anything else stops here with no evaluation, report, or CV.
 3. No match, or no `data/blacklist.md` → proceed. A blacklist entry never changes any score anywhere — it is a gate, not a signal.
 
 ## Dealbreaker gate
@@ -59,7 +59,7 @@ A hit needs a hard rule and a JD sentence that states the fact breaking it. An i
      ```
      needs_confirmation: dealbreaker "{rule}" - rerun with "evaluate anyway" to evaluate
      ```
-2. An explicit yes, or a rerun whose request says "evaluate anyway", runs the full A-H evaluation as normal. Note the override in the report. Its tracker addition carries the same URL, so it updates the SKIP row. Anything else ends here.
+2. An explicit yes, or a rerun whose request says "evaluate anyway", runs the full A-G evaluation as normal. Note the override in the report. Its tracker addition carries the same URL, so it updates the SKIP row. Anything else ends here.
 3. No hit, or no hard rules → proceed.
 
 ## Agency confirmation gate (#1596, #4359)
@@ -238,9 +238,8 @@ The asymmetry is deliberate and runs one way. Inflated importance on a requireme
 
 ### Match column — source-of-truth boundary
 
-`Match` is a claim about the candidate, so it comes from **primary** files only: `cv.md`, `article-digest.md`, `config/profile.yml`, `modes/_profile.md`. A `✅ Strong` may **not** rest on an `interview-prep/story-bank.md` figure that is marked, or defaults to, `derived-unverified` or `user-cannot-confirm` — such a row is `⚠️ Partial`.
+`Match` is a claim about the candidate, so it comes from **primary** files only: `cv.md`, `article-digest.md`, `config/profile.yml`, `modes/_profile.md`.
 
-A compact match table is exactly the surface where an unverified number gets laundered into an established fact: it is scannable, it looks authoritative, and users paste it into interview prep. See the Source-of-Truth Boundary in `AGENTS.md`, which names this drift path.
 
 ### Untrusted content
 
@@ -363,25 +362,6 @@ Top 5 changes to CV + Top 5 changes to LinkedIn to maximize match.
 
 The **Reflection** column captures what was learned or what would be done differently. This signals seniority — junior candidates describe what happened, senior candidates extract lessons.
 
-**Story Bank:** The table above is for the report. The bank at `{DATA_ROOT}/interview-prep/story-bank.md` takes the same stories in a different shape, because `npm run star`, `negotiation-roi.mjs` and `story-provenance-check.mjs` read only that shape:
-
-1. If the file is missing, create it by copying `templates/story-bank.template.md`.
-2. Skip any story whose title is already in the bank.
-3. Append each new story as a `### ` block in the template's format, one field per line:
-
-```markdown
-### [Theme] Story Title
-**Source:** Report #NNN — Company — Role
-**S (Situation):** …
-**T (Task):** …
-**A (Action):** …
-**R (Result):** …
-**Reflection:** …
-**Best for questions about:** …
-```
-
-Never paste table rows into the bank. Always fill in `**A (Action):**`: a block without it is invisible to the readers. Keep the `### ` heading and the field labels in English whatever the output language. Do not add a `**Provenance:**` line: the evaluation does not get to vouch for its own figures. Without one, `story-provenance-check.mjs` sorts each figure by `cv.md` (`existing` when the same number appears there in context, `supportedByResume` when `cv.md` supports the fact but not the number, otherwise `derived-unverified`), and only the user adds a marker, in the form `templates/story-bank.template.md` gives. Over time this builds a reusable bank of 5-10 master stories that can be adapted to any interview question.
-
 **Selected and framed according to the archetype:**
 - FDE → emphasize delivery speed and client-facing
 - SA → emphasize architectural decisions
@@ -421,9 +401,9 @@ Analyze the job posting for signals that indicate whether this is a real, active
 - Search: `"{company}" hiring freeze {year}` -- note any announcements
 - If layoffs found: are they in the same department as this role?
 
-**4. Reposting Detection** (from scan-history.tsv):
-- Check if company + similar role title appeared before with a different URL
-- Note how many times and over what period
+**4. Reposting Detection** (from the tracker and earlier reports):
+- Check `data/applications.md` and `reports/` for the same company + a similar role title under a different URL
+- Note how many times and over what period; with no prior record, say so rather than guessing
 
 **5. Role Market Context** (qualitative, no additional queries):
 - Is this a common role that typically fills in 4-6 weeks?
@@ -493,7 +473,7 @@ Signals 1-5 assume the employer is real and ask whether the opening is still liv
 
 Run five checks. Checks (a) and (d) spend at most one query each from the bounded research budget. Checks (b), (c) and (e) spend no queries: they use what the candidate pasted or supplies, what (a) and (d) returned, and Block D research already gathered. When that evidence neither confirms nor contradicts a check, mark it Unknown: Neutral for the tier, never Concerning on absence of evidence alone.
 
-- **(a) Official board:** does the named company's own careers page or public ATS board list this role or a close match? Where the company has a Greenhouse, Lever or Ashby board, read the same zero-auth endpoint `scan.mjs` uses. A live public board that lists no matching role is Concerning. No public board at all is Neutral, because many companies hire through agencies or networks.
+- **(a) Official board:** does the named company's own careers page or public ATS board list this role or a close match? Where the company has a Greenhouse, Lever or Ashby board, read its public zero-auth board endpoint. A live public board that lists no matching role is Concerning. No public board at all is Neutral, because many companies hire through agencies or networks.
 - **(b) Name pairing:** does the outreach attach a second, unfamiliar name to a known brand ("Known Co / Unfamiliar X ecosystem", "a Known Co portfolio studio")? Treat the unfamiliar name as its own entity and check it separately. The known brand's reputation does not carry over to it. Concerning only when a gathered source explicitly contradicts the pairing (the known company states it has no such product, studio or partner, or warns that the name is used by impersonators), or when the source presents its list of products, studios or partners as complete and this name is not on it. Absence from a list that does not claim to be complete is Unknown. Scam reports about the unfamiliar name belong to (d), so they are not counted here again.
 - **(c) Recruiter-to-company link:** does the recruiter write from an email domain the company controls, or does the company's own site or another independent source connect the recruiter to it? A self-declared LinkedIn title is not independent evidence. An email domain that imitates the company's (a lookalike spelling or an unrelated free-mail address presented as company mail) is Concerning. Unknown is Neutral, never Positive.
 - **(d) Public scam reports:** one search, `"{unfamiliar name, or the company if there is none}" scam OR "fake recruiter" OR "fake job"`. Report what was found and how reliable the source is. A single uncorroborated post is a lead, not proof, but it still counts as Concerning.
@@ -524,17 +504,6 @@ When this signal makes the tier Suspicious, append:
 
 **Context Notes:** Any caveats (niche role, government job, evergreen position, etc.) that explain potentially concerning signals.
 
-### Prior-contact FYI (non-scoring)
-
-Check the `responsiveness` axis of the `node company-history.mjs --company <company>` card, passing the company name as its own single, quoted argument — never splice it into a longer shell string, since company names can legitimately contain quotes, `$`, backticks, or `;`. Branch on `responsiveness.label` and append ONE informational line to the report. The `facts` array can hold several applications to the same company, so fill placeholders deterministically **per category**: for each placeholder use the most recent application matching THAT placeholder's own condition — fill a responded placeholder from the most recent responded fact, a silent placeholder from the most recent silent fact — rather than forcing one fact to serve both groups. When more than one application matches a category, append a separate count for that category (e.g. ", and {K} earlier applications with the same pattern") so no history is omitted or misrepresented:
-
-- `silent-on-you` (fill from the most recent silent fact; if more than one silent application exists, append the count of the others):
-> Note: you applied to {company} on {date}; no response in {N}d after {M} follow-ups. Not a legitimacy signal — factor into how much effort to invest.
-- `mixed` (they answered at least one of your applications and went silent on another — a flat "no response" would be inaccurate). Fill the responded placeholders from the most recent **responded** fact and the silent placeholders from the most recent **silent** fact — two different applications — and give a separate count per category when more than one matches:
-> Note: mixed history with {company} — they responded on #{responded_num} ({responded_date}) but went silent on #{silent_num} (applied {silent_date}, {N}d). Not a legitimacy signal — factor into how much effort to invest.
-
-This is information about **your own history** with the company, not about this posting. It must NOT alter the 1-5 score and must NOT alter the Assessment tier above — those are driven exclusively by the `postingChurn` axis and the other Block G signals. If the label is `responded-before` or `no-history`, say nothing (silence is fine; no note needed).
-
 ### Edge case handling:
 - **Government/academic postings:** Longer timelines are standard. Adjust thresholds (60-90 days is normal).
 - **Evergreen/continuous hire postings:** If the JD explicitly says "ongoing" or "rolling," note it as context -- this is not a ghost job, it is a pipeline role.
@@ -551,7 +520,7 @@ Write a `## Verdict (lead)` block directly after Block G and before `## Risk Sum
 
 **Derived, never originating.** `final_decision` in `## Machine Summary` is the source of truth. This block restates that same call as one human sentence and never introduces a different one — if the sentence and the field disagree, the field is right and the sentence is the defect. Write the block from `final_decision` rather than alongside it, so the block a reader leads with cannot drift from the field a script reads. The bolded call is that field's value in the report's own language: Apply, Consider, Research first, or Skip.
 
-**The `(lead)` marker is load-bearing, and language-invariant on purpose.** The web report view promotes whichever block carries the marker into the page's lead callout, identifying it by the marker rather than by a heading word or a block letter. Translations therefore keep their own noun and the same parenthetical: `## Veredicto (lead)`, `## Verdict (lead)`. Never translate `(lead)`, and never letter this block — it sits outside the A–H sequence.
+**The `(lead)` marker is load-bearing, and language-invariant on purpose.** Readers and scripts identify the lead block by the marker rather than by a heading word or a block letter. Translations therefore keep their own noun and the same parenthetical: `## Veredicto (lead)`, `## Verdict (lead)`. Never translate `(lead)`, and never letter this block — it sits outside the A–G sequence.
 
 **No new judgment.** Every input is gathered by the time this block is written and nothing new is introduced after it. State the call plus one reason drawn from what the report already established. Do not re-score, do not add evidence, and do not hedge a decision the score has already made.
 
@@ -573,14 +542,13 @@ Close the report body with a `## Risk Summary` block directly after the `## Verd
 
 **Aggregation only, zero new judgment.** Each row quotes or links the verdict already produced by its source signal. The summary never re-scores, re-weights, or overrides — if a row looks wrong, the fix belongs in the source signal, not here.
 
-Three states per row: `✅ {clear verdict}` / `⚠️ {finding}` / `— not evaluated`. **`— not evaluated` is a first-class state:** when a signal could not run, say so explicitly rather than omitting the row, so an all-✅ summary can be trusted. **Named exception:** the Interview red flags row renders its not-evaluated case as `— no interview sessions yet` — a documented, more specific phrasing of the same "not evaluated" concept for that one row (the cross-reference check did run; it found no redflags file), not a fourth free-floating state.
+Three states per row: `✅ {clear verdict}` / `⚠️ {finding}` / `— not evaluated`. **`— not evaluated` is a first-class state:** when a signal could not run, say so explicitly rather than omitting the row, so an all-✅ summary can be trusted.
 
 | Signal | Source | Row rendering |
 |--------|--------|---------------|
 | Posting legitimacy | Block G assessment tier | `✅ High Confidence`, or `⚠️ {tier} — {one-line reason}` for Proceed with Caution / Suspicious |
 | Employment classification | Employment classification signal inside Block G | `✅ clear` when the check ran and found nothing; `⚠️ contractor-style language: "{quoted phrase}"` when the flag fired; `— not evaluated` when the check could not run |
 | Culture screen | Culture screen field in Block A | `✅ pass`, or `⚠️ caution — {evidence}` / `⚠️ fail — {evidence}`; `— not evaluated` when no screen was run |
-| Interview red flags | `interview-prep/{company-slug}-redflags.md` (from `interview-redflag` mode) | **Cross-reference, not a copy:** if the file exists, surface its current warning level plus a relative link — `[{level}](../interview-prep/{company-slug}-redflags.md)` (relative to `reports/`); otherwise `— no interview sessions yet` |
 | AI claims vs. infrastructure | AI/infrastructure mismatch check in Block G, when present | If this report contains that check, mirror its verdict (`✅ consistent` / `⚠️ {finding}`); otherwise `— not evaluated`. The row activates automatically once the check exists — no ordering dependency |
 | AI-screening disclosure | AI-screening disclosure signal in Block G (Signal 15), when present | If this report contains that check: `✅ discloses AI use` when (a) fired, `ℹ️ {jurisdiction_name} requires disclosure; posting is silent` when only (b) fired (corroborating-only, never a compliance verdict), `— no jurisdiction match` when neither fired because the candidate's jurisdiction has no table row; otherwise `— not evaluated`. The row activates automatically once the check exists — no ordering dependency |
 | Fixed-term contract | Fixed-term disclosure signal in Block G (Signal 16) | `ℹ️ fixed term — "{quoted phrase}"` when explicit fixed-term language is present; otherwise `✅ no fixed term disclosed`; `— not evaluated` only when no JD text was available |
@@ -600,7 +568,6 @@ Block format:
 | Posting legitimacy | ✅ High Confidence |
 | Employment classification | ⚠️ contractor-style language: "{quoted phrase}" |
 | Culture screen | ⚠️ caution — {evidence} |
-| Interview red flags | — no interview sessions yet |
 | AI claims vs. infrastructure | — not evaluated |
 | Fixed-term contract | ℹ️ fixed term — "18-month contract" |
 | Relocation purchasing power | ℹ️ {home.jurisdiction} ~{home.takeHome} vs {dest.jurisdiction} ~{dest.takeHome} |
@@ -611,63 +578,6 @@ Block format:
 ```
 
 Mirror the block into `## Machine Summary` as a `risk_summary:` map (exact key names and enum values in `batch/batch-prompt.md`, the Machine Summary source of truth) so downstream scripts consume it without re-parsing prose.
-
----
-
-## Cover Letter Draft (auto-generated after Block G)
-
-After saving the report and recording in the tracker, append a cover letter draft to the report file under `## Cover Letter Draft`. This is a starting point — not the final letter. The user completes it via `/career-ops cover {slug}`.
-
-**How to generate the draft:**
-
-1. Read `cv.md` — select 4 achievement bullets most relevant to the JD's top requirements (exact wording, real metrics only)
-2. Read `config/profile.yml` — extract candidate name, current role, years of experience
-3. Write a 2-sentence opening based on the role title and JD mission language
-4. Write a 1-paragraph profile intro from the cv.md summary, adapted to the JD domain
-5. Leave the "Problems / Why this company / Approach" section as a placeholder — this requires user input
-6. Detect and flag any gaps (domain mismatch, language requirement, start date urgency) so the user sees them immediately
-
-**Draft format to append to the report:**
-
-```markdown
-## Cover Letter Draft
-
-> Draft generated at evaluation time. Complete via `/career-ops cover {slug}` to fill in angles, confirm research, and generate the PDF.
-> Gaps flagged below — address them during the cover flow.
-
----
-
-**Opening** *(placeholder — refine with your "why this role" angle)*
-{2-sentence opening based on JD role title and mission language}
-
-**Profile introduction**
-{1 paragraph from cv.md summary, adapted to JD domain and required competencies}
-
-**Key achievements** *(selected from cv.md — exact wording preserved)*
-- **{lead from cv.md},** {impact sentence with metric}.
-- **{lead from cv.md},** {impact sentence with metric}.
-- **{lead from cv.md},** {impact sentence with metric}.
-- **{lead from cv.md},** {impact sentence with metric}.
-
-**Problems I will solve** *(placeholder — requires company research + your input)*
-> To be completed: what challenges does {company} face that you'd address? How would you approach them?
-
-**Closing**
-I am happy to discuss further at your convenience.
-
----
-
-**Gaps flagged:**
-{List any detected gaps — domain mismatch, language requirement, start date urgency, title mismatch. If none, write "None detected."}
-
-**JD keywords to mirror** *(extracted for ATS + human read)*
-{8-10 exact phrases from the JD}
-
----
-*Run `/career-ops cover {slug}` to complete angles, confirm company research, and generate the PDF.*
-```
-
-Apply all language rules from `_writing.md` Professional Writing section to the draft content. No em dashes, no buzzwords, active voice, concrete claims only.
 
 ---
 
@@ -746,11 +656,6 @@ Save full evaluation in `reports/{###}-{company-slug}-{YYYY-MM-DD}.md`.
 ## Score Evidence
 (five scoring dimensions, evidence status and source, unresolved questions, evidence-confidence tier, and verification priorities)
 
-## H) Draft Application Answers
-(only if score >= 4.5 — draft answers for the application form)
-
----
-
 ## Keywords extracted
 (list of 15-20 keywords from the JD for ATS optimization)
 
@@ -785,7 +690,7 @@ By default this scans the base `cv.md` — read it as a **pre-tailoring gap list
 
 **ALWAYS** record the evaluation in the tracker, as a tracker-addition TSV that `node merge-tracker.mjs` merges. Never append or edit a row in `data/applications.md` yourself: a hand-written row skips the tracker lock the other writers share and the merge's duplicate check. Rule 9 in `modes/_shared.md` says where the TSV goes; AGENTS.md, "TSV Format for Tracker Additions", defines its header row and fields. Write one TSV for this evaluation, then run `node merge-tracker.mjs` (once, after the last evaluation, when several run as a batch).
 
-If this company+role is already in the tracker, never hand-write a second row. The merge matches a re-evaluation to the existing row instead of adding another, and a status or notes change on an existing row goes through `node set-status.mjs`.
+If this company+role is already in the tracker, never hand-write a second row. The merge matches a re-evaluation to the existing row instead of adding another.
 
 The TSV carries:
 - Number: the report's number (next sequential). The merge keeps it as the tracker `#` unless that number is already taken, in which case it assigns the next free one and prints it (`➕ Add #N`)
@@ -793,11 +698,10 @@ The TSV carries:
 - Company — the END employer. If the JD is agency-mediated ("our client", agency domain, no employer named), ASK the user which agency it came through, use `?` as Company, and put a distinguishing descriptor in Notes (e.g. `fintech, Leeds`). Never write "Confidential" — the `?` marker is locale-invariant and can't collide with a real firm.
 - Via — the agency/recruiter firm the user confirmed; leave it out for a direct application. In the TSV it is a `via` column (see the TSV format spec). The merge can only store it in a tracker that has a Via column: when the user confirmed an agency and the tracker has none, run `node merge-tracker.mjs --migrate-via` first, otherwise the merge warns and drops the value.
 - Role
-- Score: copy the already-decided 1–5 Global Score from the report header and Machine Summary `score`. Apply the user's scoring rules from `modes/_profile.md` and `modes/_custom.md` when deciding that score, not again while writing the tracker. A–H are report sections, not scores to average.
+- Score: copy the already-decided 1–5 Global Score from the report header and Machine Summary `score`. Apply the user's scoring rules from `modes/_profile.md` and `modes/_custom.md` when deciding that score, not again while writing the tracker. A–G are report sections, not scores to average.
 - Status: `Evaluated`
 - PDF: ❌ (or ✅ if auto-pipeline generated PDF)
 - Report: root-relative link `[001](reports/001-company-2026-01-01.md)` (when merged via `merge-tracker.mjs` it is normalized to be relative to the tracker's own dir, e.g. `../reports/...`; see #760)
-- Notes — when the pipeline entry carries a `| posted: {YYYY-MM-DD}` segment (written by the scanner from the provider's `offer.postedAt`, see `modes/pipeline.md`), carry it through as its own trailing segment: `…; posted: 2026-08-07`. This is the only path by which the posting date reaches the tracker, and the dashboard's POSTED column — requisition age, "is this still plausibly being worked?" — reads it from the note. Copy it verbatim; when the entry has no segment, write nothing rather than inferring a date, since the column renders an absent date as `—` and a guessed one would report a months-old req as fresh.
 
 **The row the merge writes** (for reference; you write the TSV, not this row):
 
@@ -810,15 +714,3 @@ With the optional Via column (intermediary channel, #1596) after Company:
 ```markdown
 | # | Date | Company | Via | Role | Score | Status | PDF | Report | Notes |
 ```
-
-### 3. Salary observations (desired ask only)
-
-If — and only if — the user **explicitly stated a role-specific desired number for THIS application** in the conversation ("I'd ask 95k here"), append one `desired` line (source `user`) to `data/salary-observations.tsv` (create the file if missing; format per `docs/SCRIPTS.md` → salary-gap):
-
-```text
-{tracker#}\t{YYYY-MM-DD}\tdesired\t{amount}\t{currency}\tuser\t{short context note}
-```
-
-`{tracker#}` is the row's `#` **after** the merge in step 2, read from `merge-tracker.mjs`'s output. Write this line after merging, never before: until then the row has no number, and the report number is not a safe stand-in because the merge assigns a different `#` when that one is taken.
-
-Never infer a desired number from the JD, the score, or past conversations. The profile default (`config/profile.yml` → `compensation.target_range`) needs no line — `salary-gap.mjs` reads it as the fallback. The advertised figure also needs no line: the report's `advertised_comp` **is** the advertised observation.

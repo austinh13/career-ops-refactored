@@ -55,7 +55,6 @@ language:
 |---|---|---|
 | `_shared.md` | `modes/_shared.md` | 共用脈絡、個人檔案偵測、全域規則，以及台灣市場特性 |
 | `oferta.md` | `modes/oferta.md` | 完整職缺評估（Block A–F ＋ G 真實性查核） |
-| `apply.md` | `modes/apply.md` | 網頁表單填寫的即時助理 |
 | `pipeline.md` | `modes/pipeline.md` | URL 收件匣／職缺蒐集的第二大腦 |
 
 其餘工具型模式（`scan`、`batch`、`pdf`、`tracker` 等）仍使用預設的英文版，因為它們主要由命令列參數、系統路徑與設定指令構成，保持語言一致有助於工具穩定運作。

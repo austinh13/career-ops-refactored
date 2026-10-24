@@ -148,27 +148,15 @@ console.log('\nvalidateFlags — every value-taking caller handles a missing ope
 // Together those make the number monotonic downward. It may go down; it may not
 // go up without someone saying so out loud.
 const OWN_GUARD = new Map([
-  ['scan.mjs',
-    'requireValue() (scan.mjs) + the shared parseSinceDays(): distinguishes a missing value from a zero, ' +
-    'a negative, a non-finite, an out-of-range cutoff and a repeated flag — five diagnostics one generic line would replace.'],
-  ['rejection-latency.mjs',
-    'argValue() rejects missing, empty AND `--`-prefixed values, and exits 2 (not 1) — its documented exit code for a usage error.'],
-  ['scan-ats-full.mjs',
-    'valueOf() only accepts a next token that is not `--`-prefixed, and parseSinceDays()/the seed-source check reject the malformed rest.'],
   ['check-table-freshness.mjs',
     'parseDate()/parsePositiveInt() validate the operand SHAPE, naming the expected format ("expected YYYY-MM-DD", "a positive integer").'],
-  ['contacts.mjs',
-    '--vcf takes an OPTIONAL operand — `node contacts.mjs --vcf` means the default output/contacts.vcf. requireOperand would break that call.'],
-  // Not in #3092's audit, found by this sweep: a guard that predates it.
-  ['fix-slugs.mjs',
-    'a hand-rolled --file check BEFORE validateFlags, covering more than requireOperand does: `--file=` (empty) and `--file -h` (single-dash next token) are rejected too.'],
 ]);
 
 // The ratchet. Raising this is a review conversation, not a formality: it means
 // a caller runs a validator better than the shared one, and the entry above has
 // to say what that validator is. Lowering it is free — it follows a caller
 // opting in.
-const MAX_OWN_GUARD = 6;
+const MAX_OWN_GUARD = 1;
 
 // The sweep must never go green by finding nothing. A floor set below today's
 // count (6 own-guard + 14 opted into requireOperand = 20, and the opted-in half

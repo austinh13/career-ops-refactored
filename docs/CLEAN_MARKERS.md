@@ -1,7 +1,7 @@
 # clean-markers — strip invisible Unicode from generated text output
 
 Job postings, forms, recruiter emails, and copied web text are untrusted data. They can carry invisible
-Unicode that an agent may copy into a CV, cover letter, or application answer without the user ever
+Unicode that an agent may copy into a CV or application answer without the user ever
 seeing it. `clean-markers.mjs` is a dependency-free audit/clean gate for generated text files.
 
 It removes characters the user never intentionally typed: zero-width marks, bidi controls, tag
@@ -12,8 +12,8 @@ metadata and does not install packages at runtime.
 
 ```bash
 node clean-markers.mjs audit  output/acme-cv.html              # report only, never modifies
-node clean-markers.mjs clean  output/acme-cover-letter.md
-node clean-markers.mjs clean  --ascii output/cover-letter.txt  # also normalize smart quotes / dashes
+node clean-markers.mjs clean  output/acme-cv.md
+node clean-markers.mjs clean  --ascii output/cv.txt  # also normalize smart quotes / dashes
 node clean-markers.mjs audit  output/*.html output/*.md        # globs OK
 ```
 
@@ -22,15 +22,15 @@ node clean-markers.mjs audit  output/*.html output/*.md        # globs OK
 - **`clean`** strips invisible Unicode from supported text files. Non-breaking spaces are treated as
   normal typography and are not flagged or replaced.
 - **`--ascii`** (clean, text only) additionally converts curly quotes → straight, em/en-dash → hyphen,
-  ellipsis → `...` — handy for plain-text cover letters or emails.
+  ellipsis → `...` — handy for plain-text CVs.
 
 ## When to run
 
 Before generated text leaves your machine or before rendering HTML/Markdown into a final document:
 
 ```bash
-node clean-markers.mjs audit output/acme-cv.html output/acme-cover-letter.md
-node clean-markers.mjs clean output/acme-cv.html output/acme-cover-letter.md
+node clean-markers.mjs audit output/acme-cv.html output/acme-cv.md
+node clean-markers.mjs clean output/acme-cv.html output/acme-cv.md
 ```
 
 ## Dependencies
