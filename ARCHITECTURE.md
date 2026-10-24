@@ -52,7 +52,7 @@ AI coding CLI  ─┐
 **Standalone evaluators** run the same scoring without an interactive CLI: `gemini-eval.mjs`, `ollama-eval.mjs`, `openai-eval.mjs`, `openrouter-runner.mjs`, and `batch-evaluate-gemini.mjs` for batches. `evals/` and `eval-golden.mjs` hold the golden set that keeps them consistent.
 
 ### Resume improvement — CVs, ATS, profile
-`modes/pdf.md` builds a tailored CV payload; `build-cv-html.mjs` / `build-cv-latex.mjs` render it through `templates/`; `generate-pdf.mjs` (Playwright) and `generate-latex.mjs` produce the files. Gates: `verify-cv-facts.mjs` (every claim traces to `cv.md`), `cv-title-check.mjs`, `verify-cv-structure.mjs`, `verify-ats.mjs`, `keyword-match.mjs`, `jd-skill-gap.mjs`. `add`, `expand`, `master-profile` and `intake` grow `cv.md` and the profile from real evidence, always confirm-before-write.
+`modes/improve.md` is the default: it runs the improvement analysis and returns a table of edits to `cv.md` (original, replacement, justification, where), checked by `verify-edit-table.mjs`. `modes/pdf.md` builds a tailored CV payload; `build-cv-html.mjs` / `build-cv-latex.mjs` render it through `templates/`; `generate-pdf.mjs` (Playwright) and `generate-latex.mjs` produce the files. Gates: `verify-cv-facts.mjs` (every claim traces to `cv.md`), `cv-title-check.mjs`, `verify-cv-structure.mjs`, `verify-ats.mjs`, `keyword-match.mjs`, `jd-skill-gap.mjs`. `add`, `expand`, `master-profile` and `intake` grow `cv.md` and the profile from real evidence, always confirm-before-write.
 
 ### Tracking — `data/` + `reports/` + tracker scripts
 Every graded offer is registered. `data/applications.md` is the tracker table; `reports/{NNN}-{company}-{date}.md` holds full evaluations. `merge-tracker.mjs`, `dedup-tracker.mjs`, `normalize-statuses.mjs`, `fix-report-links.mjs` and `reconcile-pipeline.mjs` keep it consistent (atomic writes). Report numbers are claimed atomically via `reserve-report-num.mjs`.
@@ -65,7 +65,7 @@ Every graded offer is registered. `data/applications.md` is the tracker table; `
 ```
 paste JD/URL ──► liveness check ──► oferta + cv.md ──► reports/NNN-*.md ──► data/applications.md
                                                             │
-                                                            └──► pdf mode ──► verified, ATS-checked CV
+                                                            └──► improve mode ──► fact-checked edit table (pdf mode: fresh CV)
 ```
 
 ## Quality gates
@@ -77,4 +77,4 @@ paste JD/URL ──► liveness check ──► oferta + cv.md ──► reports
 
 - The boundary → `DATA_CONTRACT.md`
 - The scoring → `modes/_shared.md` + `modes/oferta.md`
-- The CV flow → `modes/pdf.md`
+- The CV flow → `modes/improve.md` (and `modes/pdf.md` for the fresh-CV path)

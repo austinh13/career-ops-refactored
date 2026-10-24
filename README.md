@@ -5,7 +5,7 @@ AI job-fit grading and resume improvement, running locally inside your AI coding
 This is a pared-down fork of [santifer's career-ops](https://santifer.io). It keeps two functions and nothing else:
 
 1. **Job grading.** Paste a job URL or description. career-ops checks the posting is still open, evaluates it against your CV and profile, and writes a report with a 1-5 score, a verdict, a posting-legitimacy check and a risk summary.
-2. **Resume improvement.** For a role you graded, career-ops tailors your CV to the posting without inventing anything, fact-checks every claim against `cv.md`, scores it for ATS parseability, and outputs PDF, HTML, LaTeX or markdown. It can also grow `cv.md` from evidence you already have.
+2. **Resume improvement.** For a role you graded, career-ops reads your CV against the posting and returns a table of edits (original text, replacement text, justification, where) without inventing anything, fact-checks every replacement against `cv.md`, and can still output a fresh PDF, HTML, LaTeX or markdown CV. It can also grow `cv.md` from evidence you already have.
 
 | Principle | What it means |
 |-----------|---------------|
@@ -24,8 +24,8 @@ node doctor.mjs                      # confirms node, dependencies and setup
 
 Open your AI CLI (Claude Code, Codex, OpenCode, Pi, Qwen, Kimi, Antigravity, Grok, ...) in this directory. On first launch it walks you through setup (your CV, profile and target roles) by chatting. Then:
 
-- Paste a job URL or description to grade it and get a tailored CV (`auto-pipeline`).
-- `/career-ops <mode>` runs a single mode (see below). In Codex, ask for the mode in plain language, e.g. "Run the career-ops pdf mode for the latest evaluated role".
+- Paste a job URL or description to grade it and get a resume edit table (`auto-pipeline`).
+- `/career-ops <mode>` runs a single mode (see below). In Codex, ask for the mode in plain language, e.g. "Run the career-ops improve mode for the latest evaluated role".
 
 No agent CLI? `node gemini-eval.mjs`, `openai-eval.mjs`, `ollama-eval.mjs` and `openrouter-runner.mjs` grade a job description using an API key (see `.env.example`).
 
@@ -46,6 +46,7 @@ No agent CLI? `node gemini-eval.mjs`, `openai-eval.mjs`, `ollama-eval.mjs` and `
 
 | Mode | What it does |
 |------|--------------|
+| `improve` | Table of edits to your `cv.md` for a role: original text, replacement text, justification, where |
 | `pdf` | Tailored, ATS-optimized CV as PDF (optional hiring-manager audit with `--hm-audit`) |
 | `text` | Tailored CV as markdown |
 | `latex` / `latex-tex` | LaTeX/Overleaf export, or tailor your own `.tex` CV in place |
@@ -65,7 +66,7 @@ No agent CLI? `node gemini-eval.mjs`, `openai-eval.mjs`, `ollama-eval.mjs` and `
 ## How CV tailoring works
 
 - Content comes only from `cv.md`, `article-digest.md`, `config/profile.yml`, `modes/_profile.md` and what you say in the session. Keywords are reformulated, never fabricated.
-- `verify-cv-facts.mjs` gates every generated CV, `cv-title-check.mjs` and `verify-cv-structure.mjs` warn about drift from `cv.md`, and `verify-ats.mjs` scores the HTML for ATS parsers.
+- `verify-edit-table.mjs` checks every edit row (originals quoted from `cv.md`, replacements through the fact gate), `verify-cv-facts.mjs` gates every generated CV, `cv-title-check.mjs` and `verify-cv-structure.mjs` warn about drift from `cv.md`, and `verify-ats.mjs` scores the HTML for ATS parsers.
 
 ## Your files
 

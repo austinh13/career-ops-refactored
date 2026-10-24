@@ -27,7 +27,7 @@ These files contain your personal data, customizations, and work product. Only t
 | `data/status-log.tsv` (sibling of the active tracker file) | Append-only status transition ledger, if present |
 | `reports/*` | Your evaluation reports, including optional `job_facts_cache` metadata. `evaluation-cache.mjs` projects only the public allowlist documented in `batch/batch-prompt.md`; candidate-fit data never enters the reusable job-facts payload |
 | `batch/tracker-additions/*.tsv` | Pending tracker rows, one TSV per evaluation (gitignored). `merge-tracker.mjs` reads them from the data root, not the checkout |
-| `output/*` | Your generated PDFs and CV HTML |
+| `output/*` | Your resume edit tables, generated PDFs and CV HTML |
 | `jds/*` | Your saved job descriptions |
 | `templates/cv-{candidate}-{company-slug}.html` | Your per-application generated CVs, for installs that save the HTML twin under `templates/` instead of `output/`. Anything under `templates/` starting with `cv-` that is NOT one of the shipped `cv-template*.html` files is your data |
 | `templates/cv-template.{name}.html` / `.tex` | Your own named CV template variant, when `{name}` matches `cv.template` in `config/profile.yml` (the convention `cv-templates.mjs`'s `resolveTemplate()` reads). `templates/` is otherwise system-owned |
@@ -43,7 +43,7 @@ These files contain system logic, scripts, templates, and instructions.
 | `modes/_custom.template.md` / `_profile.template.md` / `_brief.template.md` | Template seeds for the user's `modes/_custom.md` / `_profile.md` / `_brief.md` |
 | `modes/oferta.md` / `ofertas.md` / `triage.md` / `pipeline.md` / `batch.md` / `auto-pipeline.md` | Job grading mode instructions |
 | `modes/oferta-signals/*` | Block G posting-legitimacy signal checks read on demand by `oferta.md` |
-| `modes/pdf.md` / `modes/pdf/*` / `latex.md` / `latex-tex.md` / `text.md` / `ats.md` | Resume tailoring and checking mode instructions |
+| `modes/improve.md` / `modes/pdf.md` / `modes/pdf/*` / `latex.md` / `latex-tex.md` / `text.md` / `ats.md` | Resume tailoring and checking mode instructions |
 | `modes/add.md` / `expand.md` / `master-profile.md` / `intake.md` | Resume content-building mode instructions |
 | `modes/heuristics/*` | Shared candidate-facing writing heuristics |
 | `modes/{ar,da,de,es,fr,hi,id,it,ja,ko,nl,pl,pt,ru,sg,tr,ua,vi,zh,zh-TW}/*` | Language and market evaluation modes |

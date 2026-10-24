@@ -5,7 +5,7 @@
 Forked from [santifer's career-ops](https://santifer.io), which he built and used for his own job search: 740 listings evaluated, 68 applied, 12 interviews, 1 offer, a Head of Applied AI role. This fork keeps exactly two functions:
 
 1. **Job grading**: evaluate a posting against the user's profile into a structured report with a 1-5 score, verdict, posting-legitimacy check and risk summary (`oferta`, `ofertas`, `triage`, `pipeline`, `batch`, `auto-pipeline`).
-2. **Resume improvement**: tailor and verify the user's CV for a graded role, ATS-check it, and grow `cv.md` from real evidence (`pdf`, `text`, `latex`, `latex-tex`, `ats`, `add`, `expand`, `master-profile`, `intake`).
+2. **Resume improvement**: for a graded role, take the user's CV and produce a table of edits (original text, replacement text, justification, where), fact-checked against `cv.md`; a fresh PDF, markdown or LaTeX CV is still available on request. Also ATS-check it, ATS-check it, and grow `cv.md` from real evidence (`improve`, `pdf`, `text`, `latex`, `latex-tex`, `ats`, `add`, `expand`, `master-profile`, `intake`).
 
 **It works out of the box, but it's designed to be made yours.** You (AI Agent) can edit the user's files: they say "change the archetypes to data engineering roles" and you do it. That's the whole point.
 
@@ -112,6 +112,7 @@ AI-powered, CLI-agnostic job grading and CV tailoring. Runs on any AI coding CLI
 | `merge-tracker.mjs` / `dedup-tracker.mjs` / `normalize-statuses.mjs` / `fix-report-links.mjs` / `verify-pipeline.mjs` | Tracker writer and health tooling |
 | `reserve-report-num.mjs` | Atomic report-number allocator for parallel workers |
 | `precheck-duplicate.mjs` / `find.mjs` | Read-only duplicate check and company/role/number lookup |
+| `verify-edit-table.mjs` | Gate for the `improve` edit table: every Original text is quoted from `cv.md`, Justification and Where are filled, every Replacement text passes `verify-cv-facts.mjs` |
 | `generate-pdf.mjs` | Playwright: HTML to PDF |
 | `build-cv-html.mjs` / `build-cv-latex.mjs` | Render a tailored-CV JSON payload through a template |
 | `generate-latex.mjs` / `extract-latex-content.mjs` / `patch-latex-content.mjs` / `install-latex-engine.mjs` | LaTeX CV path, including in-place tailoring of the user's own `.tex` |
@@ -257,7 +258,7 @@ Then run `node doctor.mjs` once before you confirm. Mention a setup command only
 Then confirm:
 > "You're all set! You can now:
 > - Paste a job URL or description to grade it against your profile
-> - Ask me to tailor your CV (`pdf`, `text`, `latex`) for a graded role
+> - Ask me to improve your resume for a graded role (`improve` gives an edit table; `pdf`, `text`, `latex` produce a fresh CV)
 > - Open the command menu for your CLI: `/career-ops`, `/skill:career-ops` on Pi, or ask Codex to show the available career-ops modes
 >
 > Everything is customizable — just ask me to change anything."
@@ -355,7 +356,8 @@ A single-string `modes_dir` (today's default, ~90% of users) behaves exactly as 
 | Wants a fast first-pass filter before full evaluation | `triage` |
 | Processes pending URLs | `pipeline` |
 | Batch processes offers | `batch` |
-| Wants to generate a tailored CV/PDF | `pdf` |
+| Wants to improve their resume for a role (default; table of edits: original text, replacement text, justification, where) | `improve` |
+| Wants a fresh tailored CV as a PDF | `pdf` |
 | Wants to build, import, review, validate, or prepare selected experience facts from a Master Career Profile | `master-profile` — source-backed CV import with explicit approval; opt-in verbatim HTML payload preparation and consistency verification |
 | Wants to check if a generated CV is ATS-friendly (parseability score + issues), or to prepare a render payload for an ATS parser before building the HTML | `ats` — two stages: `ats-payload.mjs` on the payload (one safe fold, three lints it only reports), then `verify-ats.mjs` on the generated HTML (score + issues) |
 | Wants a hiring-manager's read on a tailored CV before sending | `pdf --hm-audit` — opt-in pass (`modes/pdf/hm-audit.md`), off by default: researches the likely reviewer, dispatches a separate agent role-playing them, and returns a bullet-by-bullet keep/cut/rewrite verdict |

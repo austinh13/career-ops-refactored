@@ -172,7 +172,7 @@ spend_tier: standard
 #                                         # "auto" lets projects split. Unset: the template's own default
 
 cv:
-  output_format: "html" # "html" (default), "latex", or "text" (tailored markdown, no PDF)
+  output_format: "table" # "table" (default: resume edit table, no PDF), "html" (tailored PDF), "latex", or "text" (tailored markdown, no PDF)
   # (Optional) Canva resume design ID for visual CV generation via /career-ops pdf.
   # Find it in your Canva design URL: https://www.canva.com/design/DAxxxxxxx/...
   # The ID starts with "D" and is 11 characters long.

@@ -63,16 +63,17 @@ The evaluation inherits `oferta`'s bounded research budget. Company, compensatio
 Save the full evaluation in `reports/{###}-{company-slug}-{YYYY-MM-DD}.md` (see format in `modes/oferta.md`).
 Include Block G in the saved report. Add **URL:** {url} and **Legitimacy:** {tier} to the report header.
 
-## Step 3 — Generate PDF
+## Step 3 — Improve the Resume
 
 Read `config/profile.yml`. Check `cv.output_format`:
 
 - If `"latex"`, execute the full pipeline from `modes/latex.md`
 - If `"text"`, execute the full pipeline from `modes/text.md`
-- Otherwise (default), execute the full pipeline from `modes/pdf.md`
+- If `"html"`, execute the full pipeline from `modes/pdf.md` (tailored PDF)
+- Otherwise (default), execute the full pipeline from `modes/improve.md` (edit table: original text, replacement text, justification, where)
 
 ## Step 4 — Update Tracker
 
-Record it in the tracker the way `oferta` does ("Record in tracker"): a tracker-addition TSV merged by `node merge-tracker.mjs`, never a row written into `data/applications.md` by hand. Fill every field, including the Report link and PDF as ✅.
+Record it in the tracker the way `oferta` does ("Record in tracker"): a tracker-addition TSV merged by `node merge-tracker.mjs`, never a row written into `data/applications.md` by hand. Fill every field, including the Report link. PDF is ✅ only when Step 3 produced a PDF (the `"html"` route); the default edit table, `latex` and `text` leave it ❌.
 
 **If an artifact-generation step fails after the JD and gates are resolved**, continue with the next ones and mark the failed step as pending in the tracker. An unavailable JD or unresolved liveness/confirmation gate stops the pipeline before evaluation and all artifact/tracker writes.

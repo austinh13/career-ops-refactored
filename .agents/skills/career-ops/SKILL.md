@@ -8,7 +8,7 @@ description: >-
 arguments: mode
 user_invocable: true
 user-invocable: true
-argument-hint: "[oferta | ofertas | triage | pipeline | batch | pdf | ats | text | latex | latex-tex | add | expand | master-profile | intake]"
+argument-hint: "[oferta | ofertas | triage | pipeline | batch | improve | pdf | ats | text | latex | latex-tex | add | expand | master-profile | intake]"
 license: MIT
 ---
 
@@ -36,6 +36,7 @@ Codex prompt examples that map to the same router semantics:
 ```text
 Evaluate this JD with career-ops auto-pipeline: https://company.com/jobs/123
 Run the career-ops pipeline mode for data/pipeline.md.
+Run the career-ops improve mode for the latest evaluated role.
 Run the career-ops pdf mode for the latest evaluated role.
 Run the career-ops ats mode on the latest generated CV.
 ```
@@ -53,6 +54,7 @@ Determine the mode from `$mode`:
 | `triage` | `triage` |
 | `pipeline` | `pipeline` |
 | `batch` | `batch` |
+| `improve` | `improve` |
 | `pdf` | `pdf` |
 | `ats` | `ats` |
 | `text` | `text` |
@@ -107,6 +109,7 @@ Concrete equivalents for Codex prompt-driven sessions:
 ```text
 /career-ops {JD}           ↔ "Evaluate this JD with career-ops auto-pipeline: {JD or URL}"
 /career-ops pipeline       ↔ "Run the career-ops pipeline mode for data/pipeline.md."
+/career-ops improve        ↔ "Run the career-ops improve mode for the latest evaluated role."
 /career-ops pdf            ↔ "Run the career-ops pdf mode for the latest evaluated role."
 /career-ops ats            ↔ "Run the career-ops ats mode on the latest generated CV."
 ```
@@ -123,6 +126,7 @@ Available commands:
   /career-ops triage    → Fast first-pass go/no-go score from modes/_brief.md (writes no files)
   /career-ops pipeline  → Process pending URLs from inbox (data/pipeline.md)
   /career-ops batch     → Batch evaluation with parallel workers
+  /career-ops improve   → Resume improvement table: original | replacement | justification | where
   /career-ops pdf       → Tailored, ATS-optimized CV (PDF)
   /career-ops ats       → ATS-friendliness check of a generated CV (score + fixable issues)
   /career-ops text      → Tailored markdown CV (mirrors cv.md, no PDF)
@@ -151,7 +155,7 @@ Resolve `language.modes_dir` before applying the path shorthand below. With no s
 
 Read the resolved shared context (default `modes/_shared.md`) + `modes/_profile.md` (if exists) + `modes/_custom.md` (if exists) + the resolved selected mode file (default `modes/{mode}.md`). For an A-G evaluation, that selected file is the primary directory's evaluation mode; do not also load an evaluation file from a secondary directory.
 
-Applies to: `auto-pipeline`, `oferta`, `ofertas`, `pdf`, `text`, `pipeline`, `batch`
+Applies to: `auto-pipeline`, `oferta`, `ofertas`, `improve`, `pdf`, `text`, `pipeline`, `batch`
 
 ### Standalone modes with profile and custom context
 

@@ -33,10 +33,10 @@ const declaredLine = profileExample
   .find((line) => /^\s*output_format\s*:/.test(line)) ?? '';
 const declaredFormats = [...new Set([...declaredLine.matchAll(/"([a-z]+)"/g)].map((m) => m[1]))];
 
-if (declaredFormats.length >= 3 && ['html', 'latex', 'text'].every((f) => declaredFormats.includes(f))) {
+if (declaredFormats.length >= 3 && ['table', 'html', 'latex', 'text'].every((f) => declaredFormats.includes(f))) {
   pass(`config/profile.example.yml declares cv.output_format values: ${declaredFormats.join(', ')}`);
 } else {
-  fail(`config/profile.example.yml no longer declares html/latex/text for cv.output_format (found: ${declaredFormats.join(', ') || 'none'})`);
+  fail(`config/profile.example.yml no longer declares table/html/latex/text for cv.output_format (found: ${declaredFormats.join(', ') || 'none'})`);
 }
 
 // Each non-default value routes to its own mode file; anything else is the
@@ -47,7 +47,8 @@ if (declaredFormats.length >= 3 && ['html', 'latex', 'text'].every((f) => declar
 const routes = [
   { label: '"latex"', cue: /"latex"/, mode: 'modes/latex.md' },
   { label: '"text"', cue: /"text"/, mode: 'modes/text.md' },
-  { label: 'default', cue: /otherwise/i, mode: 'modes/pdf.md' },
+  { label: '"html"', cue: /"html"/, mode: 'modes/pdf.md' },
+  { label: 'default', cue: /otherwise/i, mode: 'modes/improve.md' },
 ];
 
 // Where a route lands = the first `modes/<name>.md` after the cue that selects it.
@@ -67,7 +68,7 @@ const step3 = autoPipeline.split(/^## Step 3\b/m)[1]?.split(/^## /m)[0] ?? '';
 const step3Mispaired = mispairings(step3);
 
 if (step3.includes('cv.output_format') && step3Mispaired.length === 0) {
-  pass('modes/auto-pipeline.md Step 3 routes latex → latex.md, text → text.md, default → pdf.md');
+  pass('modes/auto-pipeline.md Step 3 routes latex → latex.md, text → text.md, html → pdf.md, default → improve.md');
 } else {
   fail(`modes/auto-pipeline.md Step 3 is no longer the routing rule (${
     [step3.includes('cv.output_format') ? null : 'missing cv.output_format', ...step3Mispaired]
@@ -87,7 +88,7 @@ const pipelineRouting = formatAt !== -1 && gateAt > formatAt ? pipeline.slice(fo
 const pipelineMispaired = mispairings(pipelineRouting);
 
 if (formatAt !== -1 && pipelineMispaired.length === 0) {
-  pass('modes/pipeline.md routes CV output on cv.output_format to the same three mode files');
+  pass('modes/pipeline.md routes CV output on cv.output_format to the same four mode files');
 } else {
   fail(`modes/pipeline.md ignores cv.output_format when choosing the CV artifact (${
     [formatAt === -1 ? 'missing cv.output_format' : null, ...pipelineMispaired]

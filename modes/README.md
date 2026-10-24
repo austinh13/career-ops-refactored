@@ -20,6 +20,7 @@ table in `AGENTS.md` (mirrored in `CLAUDE.md`).
 | `pipeline.md` | `pipeline` | Process the URL inbox (`data/pipeline.md`) |
 | `triage.md` | `triage` | Fast first-pass quick score before full evaluation |
 | `batch.md` | `batch` | Mass evaluation with headless workers |
+| `improve.md` | `improve` | Resume improvement table: original text, replacement text, justification, where (default, no PDF) |
 | `pdf.md` | `pdf` | ATS-optimized tailored CV (PDF) |
 | `ats.md` | `ats` | ATS-friendliness check of a generated CV (parseability score + issues) |
 | `latex.md` | `latex` | LaTeX/Overleaf CV export |
