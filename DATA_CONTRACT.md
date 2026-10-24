@@ -50,6 +50,7 @@ These files contain system logic, scripts, templates, and instructions.
 | `CLAUDE.md` / `OPENCODE.md` / `CODEX.md` / `KIMI.md` / `GEMINI.md` | Agent instruction wrappers (`GEMINI.md` is a legacy no-op context guard) |
 | `AGENTS.md` | Canonical agent instructions (imported by CLI-specific wrappers) |
 | `*.mjs`, `lib/*`, `utils/*`, `scripts/*` | Utility scripts |
+| `dashboard/*` | Local dashboard page (served by `dashboard.mjs`) |
 | `providers/` | Shared HTTP guards and the few ATS parsers used for JD extraction and liveness |
 | `batch/batch-prompt.md` / `batch-runner.sh` / `*.mjs` | Batch worker prompt, orchestrator and helpers |
 | `evals/*` | Golden evaluation set |

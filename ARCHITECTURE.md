@@ -54,6 +54,9 @@ AI coding CLI  ─┐
 ### Resume improvement — CVs, ATS, profile
 `modes/improve.md` is the default: it runs the improvement analysis and returns a table of edits to `cv.md` (original, replacement, justification, where), checked by `verify-edit-table.mjs`. `modes/pdf.md` builds a tailored CV payload; `build-cv-html.mjs` / `build-cv-latex.mjs` render it through `templates/`; `generate-pdf.mjs` (Playwright) and `generate-latex.mjs` produce the files. Gates: `verify-cv-facts.mjs` (every claim traces to `cv.md`), `cv-title-check.mjs`, `verify-cv-structure.mjs`, `verify-ats.mjs`, `keyword-match.mjs`, `jd-skill-gap.mjs`. `add`, `expand`, `master-profile` and `intake` grow `cv.md` and the profile from real evidence, always confirm-before-write.
 
+### Dashboard — `dashboard.mjs` + `dashboard/`
+A local-only web view (`npm run dashboard`) that adds no data of its own: it imports links into `data/pipeline.md`, reads the tracker through `tracker-parse.mjs`, serves `reports/` and the `improve` edit tables (checked with `verify-edit-table.mjs`), and starts the agent CLI for grading and improving. It binds to 127.0.0.1 and rejects non-local Host/Origin headers.
+
 ### Tracking — `data/` + `reports/` + tracker scripts
 Every graded offer is registered. `data/applications.md` is the tracker table; `reports/{NNN}-{company}-{date}.md` holds full evaluations. `merge-tracker.mjs`, `dedup-tracker.mjs`, `normalize-statuses.mjs`, `fix-report-links.mjs` and `reconcile-pipeline.mjs` keep it consistent (atomic writes). Report numbers are claimed atomically via `reserve-report-num.mjs`.
 

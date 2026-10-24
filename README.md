@@ -56,6 +56,14 @@ No agent CLI? `node gemini-eval.mjs`, `openai-eval.mjs`, `ollama-eval.mjs` and `
 | `master-profile` | Import, review and validate a source-backed Master Career Profile |
 | `intake` | Build or enrich your profile and CV from documents you drop in `documents/` |
 
+## Dashboard
+
+```bash
+npm run dashboard      # http://localhost:4173, this computer only
+```
+
+A local web app over the same files and scripts: import job links into the inbox, browse graded roles by score with each full report, and read the resume edit tables (original, replacement, justification, where). Its "Grade pending links" and "Improve resume" buttons start your agent CLI headless (`CAREER_OPS_CLI`, or the first installed one), the same as running the mode yourself.
+
 ## How grading works
 
 - The score is a holistic 1-5 judgment over CV match, role fit, compensation, culture signals and posting legitimacy, using your archetypes in `modes/_profile.md`. Below 4.0 the report recommends not applying.

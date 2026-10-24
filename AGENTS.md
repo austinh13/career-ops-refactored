@@ -112,6 +112,7 @@ AI-powered, CLI-agnostic job grading and CV tailoring. Runs on any AI coding CLI
 | `merge-tracker.mjs` / `dedup-tracker.mjs` / `normalize-statuses.mjs` / `fix-report-links.mjs` / `verify-pipeline.mjs` | Tracker writer and health tooling |
 | `reserve-report-num.mjs` | Atomic report-number allocator for parallel workers |
 | `precheck-duplicate.mjs` / `find.mjs` | Read-only duplicate check and company/role/number lookup |
+| `dashboard.mjs` / `dashboard/` | Local-only web dashboard (`npm run dashboard`, http://localhost:4173): imports links into `data/pipeline.md`, shows tracker scores and reports, shows `improve` edit tables. Reads the existing files and scripts; starts the user's agent CLI for grading and improving |
 | `verify-edit-table.mjs` | Gate for the `improve` edit table: every Original text is quoted from `cv.md`, Justification and Where are filled, every Replacement text passes `verify-cv-facts.mjs` |
 | `generate-pdf.mjs` | Playwright: HTML to PDF |
 | `build-cv-html.mjs` / `build-cv-latex.mjs` | Render a tailored-CV JSON payload through a template |
