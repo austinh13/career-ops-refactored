@@ -124,7 +124,7 @@ test('every opt-in key the example ships commented out is known, including mode-
   // auto_pdf_score_threshold (modes/pipeline.md) and culture_screen
   // (modes/_shared.md) have no .mjs reader, so a grep for readers misses them;
   // they were reported "no effect" exactly like style and page_format.
-  for (const key of ['auto_pdf_score_threshold', 'culture_screen']) {
+  for (const key of ['auto_pdf_score_threshold', 'improve_score_threshold', 'culture_screen']) {
     assert.match(EXAMPLE, new RegExp(`^# ${key}:`, 'm'), `${key} is no longer a commented block in the example`);
     const { findings } = validateProfile(`${key}: 1\n`, EXAMPLE);
     assert.deepEqual(findings, [], `${key} was reported: ${JSON.stringify(findings)}`);

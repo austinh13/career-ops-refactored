@@ -70,7 +70,7 @@ Read `config/profile.yml`. Check `cv.output_format`:
 - If `"latex"`, execute the full pipeline from `modes/latex.md`
 - If `"text"`, execute the full pipeline from `modes/text.md`
 - If `"html"`, execute the full pipeline from `modes/pdf.md` (tailored PDF)
-- Otherwise (default), execute the full pipeline from `modes/improve.md` (edit table: original text, replacement text, justification, where)
+- Otherwise (default), execute the full pipeline from `modes/improve.md` (edit table: original text, replacement text, justification, where), **only when the score is at or above `improve_score_threshold`** in `config/profile.yml` (default `3.5`). Below it, skip this step: the report is already written, say in the final summary that the resume was not improved because the score is below the threshold and that `/career-ops improve {company-slug}` runs it on demand. An explicit `improve` request is never gated.
 
 ## Step 4 — Update Tracker
 

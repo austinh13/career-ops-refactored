@@ -257,6 +257,18 @@ cv:
 # generate a PDF for every offer.
 # auto_pdf_score_threshold: 4.0
 
+# ── Resume-improvement gate ─────────────────────────────────────────────────
+#
+# Used by `/career-ops pipeline` and the auto-pipeline. The default CV output
+# (`cv.output_format: "table"`, the `improve` edit table) runs only for offers
+# scoring at or above this threshold, so no tokens go to improving a resume
+# for a role the report recommends against. Below it the report is still
+# written and the tracker row added. Defaults to 3.5 when absent.
+#
+# `/career-ops improve {company-slug}` always runs, whatever the score.
+# Set it to 0 to improve the resume for every graded offer.
+# improve_score_threshold: 3.5
+
 # ── Two-pass triage gate ────────────────────────────────────────────────────
 #
 # Used by `/career-ops pipeline`. Before running the full A-G evaluation on
