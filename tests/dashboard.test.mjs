@@ -93,3 +93,22 @@ test('requests that are not local or not JSON are refused', async () => {
   assert.equal(form.status, 415);
   assert.equal((await post('/api/run', { action: 'rm -rf' })).status, 400);
 });
+
+test('hiding a role is reversible and leaves the tracker untouched', async () => {
+  const tracker = join(root, 'data', 'applications.md');
+  const before = readFileSync(tracker, 'utf-8');
+  assert.deepEqual((await (await post('/api/hide', { nums: [2], hidden: true })).json()).hidden, [2]);
+  let { jobs } = await (await get('/api/jobs')).json();
+  assert.deepEqual(jobs.map((j) => [j.num, j.hidden]), [[1, false], [2, true]]);
+  assert.equal(readFileSync(tracker, 'utf-8'), before, 'the tracker must not change');
+  assert.deepEqual(JSON.parse(readFileSync(join(root, 'data', 'dashboard-hidden.json'), 'utf-8')), [2]);
+  await post('/api/hide', { nums: [2], hidden: false });
+  ({ jobs } = await (await get('/api/jobs')).json());
+  assert.deepEqual(jobs.map((j) => j.hidden), [false, false]);
+});
+
+test('hide rejects bad input', async () => {
+  assert.equal((await post('/api/hide', { nums: ['2'], hidden: true })).status, 400);
+  assert.equal((await post('/api/hide', { nums: [], hidden: true })).status, 400);
+  assert.equal((await post('/api/hide', { nums: [1] })).status, 400);
+});

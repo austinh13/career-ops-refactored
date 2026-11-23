@@ -62,7 +62,7 @@ No agent CLI? `node gemini-eval.mjs`, `openai-eval.mjs`, `ollama-eval.mjs` and `
 npm run dashboard      # http://localhost:4173, this computer only
 ```
 
-A local web app over the same files and scripts: import job links into the inbox, browse graded roles by score with each full report, and read the resume edit tables (original, replacement, justification, where). Its "Grade pending links" and "Improve resume" buttons start your agent CLI headless (`CAREER_OPS_CLI`, or the first installed one), the same as running the mode yourself.
+A local web app over the same files and scripts: import job links into the inbox, browse graded roles by score with each full report (hide roles you have applied to, or any other, without touching your tracker), and read the resume edit tables (original, replacement, justification, where). Its "Grade pending links" and "Improve resume" buttons start your agent CLI headless (`CAREER_OPS_CLI`, or the first installed one), the same as running the mode yourself.
 
 ## How grading works
 

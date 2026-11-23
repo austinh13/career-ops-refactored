@@ -61,6 +61,7 @@ const read = (path) => (existsSync(path) ? readFileSync(path, 'utf-8') : '');
 /* ---------- data readers (existing logic) ---------- */
 
 function readTracker(root) {
+  const hidden = readHidden(root);
   const lines = read(resolveTrackerPath(root)).split(/\r?\n/);
   const colmap = resolveColumns(lines);
   return lines.map((line) => parseTrackerRow(line, colmap)).filter(Boolean).map((row) => ({
@@ -75,7 +76,21 @@ function readTracker(root) {
     notes: row.notes,
     url: row.url,
     report: reportFileFor(root, row.num),
+    hidden: hidden.has(row.num),
   }));
+}
+
+/** Row numbers the user hid from the dashboard. The tracker itself is never touched. */
+const hiddenPath = (root) => join(root, 'data', 'dashboard-hidden.json');
+function readHidden(root) {
+  try { return new Set(JSON.parse(read(hiddenPath(root)) || '[]').filter(Number.isInteger)); } catch { return new Set(); }
+}
+function setHidden(root, nums, hidden) {
+  const set = readHidden(root);
+  for (const num of nums) hidden ? set.add(num) : set.delete(num);
+  mkdirSync(dirname(hiddenPath(root)), { recursive: true });
+  atomicWriteFile(hiddenPath(root), JSON.stringify([...set].sort((a, b) => a - b)) + '\n');
+  return [...set];
 }
 
 function reportFileFor(root, num) {
@@ -272,6 +287,11 @@ export function createDashboard({ root = getCareerOpsRoot() } = {}) {
           if (body.action !== 'grade' && !(body.action === 'improve' && Number.isInteger(body.report))) return send(res, 400, { error: 'action must be grade, or improve with a report number' });
           const result = runner.start(body.action, body.report);
           return send(res, result.error ? 409 : 200, result);
+        }
+        if (path === '/api/hide') {
+          const nums = Array.isArray(body.nums) ? body.nums : [];
+          if (!nums.length || !nums.every(Number.isInteger) || typeof body.hidden !== 'boolean') return send(res, 400, { error: 'nums (integers) and hidden (boolean) are required' });
+          return send(res, 200, { hidden: setHidden(root, nums, body.hidden) });
         }
         if (path === '/api/run/stop') return send(res, 200, { run: runner.stop() ?? null });
         return send(res, 404, { error: 'Not found' });

@@ -125,9 +125,11 @@
         <input type="search" id="q" class="grow" placeholder="Search company or role" aria-label="Search">
         <select id="statusFilter" aria-label="Status" style="width:auto"><option value="">All statuses</option></select>
         <label class="row" style="margin:0;gap:6px"><input type="checkbox" id="strong"> 4.0 and above only</label>
+        <label class="row" style="margin:0;gap:6px"><input type="checkbox" id="showHidden"> Show hidden</label>
+        <button class="btn secondary" id="hideApplied" title="Hide every Applied role from this list. Your tracker is not changed.">Hide applied</button>
       </div>
       <div class="scroll" id="jobs"></div>
-      <p class="hint" style="margin:12px 0 0">Scores are 1–5. Below 4.0 the report recommends not applying.</p>
+      <p class="hint" style="margin:12px 0 0">Scores are 1–5. Below 4.0 the report recommends not applying. Hiding a role only removes it from this list; your tracker and reports are untouched, and “Show hidden” brings it back.</p>
     </div>
   </section>
 
@@ -156,6 +158,7 @@ async function api(path, body) {
   return data;
 }
 
+const visibleJobs = () => state.jobs.filter((j) => !j.hidden);
 const scoreClass = (s) => (s == null ? 'none' : s >= 4 ? 'good' : s >= 3 ? 'warn' : 'bad');
 const scorePill = (job) => `<span class="pill ${scoreClass(job.score)}">${job.score == null ? '—' : job.score.toFixed(1)}</span>`;
 
@@ -170,9 +173,9 @@ document.querySelectorAll('nav button').forEach((b) => b.addEventListener('click
 
 /* ---------- stats ---------- */
 function renderStats(pending) {
-  const scored = state.jobs.filter((j) => j.score != null);
+  const scored = visibleJobs().filter((j) => j.score != null);
   const avg = scored.length ? (scored.reduce((a, j) => a + j.score, 0) / scored.length).toFixed(1) : '—';
-  const cells = [[pending, 'in inbox'], [state.jobs.length, 'graded'], [avg, 'avg score'], [scored.filter((j) => j.score >= 4).length, '4.0 and above'], [state.improvements.length, 'edit tables']];
+  const cells = [[pending, 'in inbox'], [visibleJobs().length, 'graded'], [avg, 'avg score'], [scored.filter((j) => j.score >= 4).length, '4.0 and above'], [state.improvements.length, 'edit tables']];
   $('stats').innerHTML = cells.map(([v, l]) => `<div class="stat"><b>${esc(v)}</b><small>${l}</small></div>`).join('');
 }
 
@@ -239,26 +242,38 @@ $('stopBtn').addEventListener('click', async () => { await api('/api/run/stop', 
 function filteredJobs() {
   const q = $('q').value.trim().toLowerCase(), st = $('statusFilter').value, strong = $('strong').checked;
   const { key, dir } = state.sort;
+  const showHidden = $('showHidden').checked;
   return state.jobs
-    .filter((j) => (!q || `${j.company} ${j.role}`.toLowerCase().includes(q)) && (!st || j.status === st) && (!strong || (j.score ?? 0) >= 4))
+    .filter((j) => (showHidden || !j.hidden) && (!q || `${j.company} ${j.role}`.toLowerCase().includes(q)) && (!st || j.status === st) && (!strong || (j.score ?? 0) >= 4))
     .sort((a, b) => ((a[key] ?? -1) > (b[key] ?? -1) ? 1 : (a[key] ?? -1) < (b[key] ?? -1) ? -1 : 0) * dir);
 }
 function renderJobs() {
   const jobs = filteredJobs();
   const th = (key, label) => `<th class="sortable" data-key="${key}">${label}${state.sort.key === key ? (state.sort.dir > 0 ? ' ▲' : ' ▼') : ''}</th>`;
-  $('jobs').innerHTML = !state.jobs.length ? '<div class="empty">No graded roles yet. Import links, then grade them.</div>'
+  $('jobs').innerHTML = !visibleJobs().length && !$('showHidden').checked && state.jobs.length ? '<div class="empty">Everything is hidden. Tick “Show hidden” to see it.</div>' : !state.jobs.length ? '<div class="empty">No graded roles yet. Import links, then grade them.</div>'
     : !jobs.length ? '<div class="empty">Nothing matches these filters.</div>'
-    : `<table><thead><tr>${th('num', '#')}${th('company', 'Company')}${th('role', 'Role')}${th('score', 'Score')}${th('status', 'Status')}${th('date', 'Date')}<th>Resume</th></tr></thead><tbody>${
-      jobs.map((j) => `<tr class="click" data-num="${j.num}"><td>${j.num}</td><td><b>${esc(j.company)}</b></td><td>${esc(j.role)}</td><td>${scorePill(j)}</td><td><span class="tag">${esc(j.status)}</span></td><td class="muted">${esc(j.date)}</td><td>${editsFor(j).length ? '<span class="tag">edits ready</span>' : ''}</td></tr>`).join('')
+    : `<table><thead><tr>${th('num', '#')}${th('company', 'Company')}${th('role', 'Role')}${th('score', 'Score')}${th('status', 'Status')}${th('date', 'Date')}<th>Resume</th><th></th></tr></thead><tbody>${
+      jobs.map((j) => `<tr class="click${j.hidden ? ' muted' : ''}" data-num="${j.num}"><td>${j.num}</td><td><b>${esc(j.company)}</b></td><td>${esc(j.role)}</td><td>${scorePill(j)}</td><td><span class="tag">${esc(j.status)}</span></td><td class="muted">${esc(j.date)}</td><td>${editsFor(j).length ? '<span class="tag">edits ready</span>' : ''}</td><td><button class="btn secondary" data-hide="${j.num}" data-to="${!j.hidden}">${j.hidden ? 'Restore' : 'Hide'}</button></td></tr>`).join('')
     }</tbody></table>`;
 }
 const editsFor = (job) => state.improvements.filter((e) => e.title.toLowerCase().includes(job.company.toLowerCase()) && job.company);
 $('jobs').addEventListener('click', (e) => {
-  const th = e.target.closest('th.sortable'), tr = e.target.closest('tr.click');
-  if (th) { state.sort = { key: th.dataset.key, dir: state.sort.key === th.dataset.key ? -state.sort.dir : 1 }; renderJobs(); }
+  const th = e.target.closest('th.sortable'), tr = e.target.closest('tr.click'), hide = e.target.closest('[data-hide]');
+  if (hide) setHidden([Number(hide.dataset.hide)], hide.dataset.to === 'true');
+  else if (th) { state.sort = { key: th.dataset.key, dir: state.sort.key === th.dataset.key ? -state.sort.dir : 1 }; renderJobs(); }
   else if (tr) openReport(Number(tr.dataset.num));
 });
-['q', 'statusFilter', 'strong'].forEach((id) => $(id).addEventListener('input', renderJobs));
+async function setHidden(nums, hidden) {
+  const result = await api('/api/hide', { nums, hidden });
+  if (result.error) return;
+  state.jobs.forEach((j) => { if (nums.includes(j.num)) j.hidden = hidden; });
+  renderJobs(); loadInbox();
+}
+$('hideApplied').addEventListener('click', () => {
+  const nums = state.jobs.filter((j) => j.status === 'Applied' && !j.hidden).map((j) => j.num);
+  if (nums.length) setHidden(nums, true);
+});
+['q', 'statusFilter', 'strong', 'showHidden'].forEach((id) => $(id).addEventListener('input', renderJobs));
 
 /* ---------- report drawer ---------- */
 function markdown(src) {
